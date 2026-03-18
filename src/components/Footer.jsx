@@ -27,7 +27,7 @@ function Footer() {
           viewport={{ once: true, amount: 0.3 }}
           custom={0}
         >
-          <h3>Prenom Nom</h3>
+          <h3>Belisa Wagner</h3>
           <p>Artiste &mdash; Createur</p>
         </motion.div>
         <motion.div
@@ -59,7 +59,7 @@ function Footer() {
         </motion.div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {currentYear} Prenom Nom. Tous droits reserves.</p>
+        <p>&copy; {currentYear} Belisa Wagner. Tous droits reserves.</p>
       </div>
     </footer>
   )

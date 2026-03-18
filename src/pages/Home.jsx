@@ -41,7 +41,7 @@ function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <h1>Prenom Nom</h1>
+          <h1>Belisa Wagner</h1>
           <motion.p
             className="hero-subtitle"
             initial={{ opacity: 0 }}
@@ -63,7 +63,11 @@ function Home() {
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
           >
-            <div className="placeholder-image">Photo</div>
+            <img
+              src="/photo-belisa.jpg"
+              alt="Belisa Wagner"
+              className="about-photo"
+            />
           </motion.div>
 
           <motion.div

@@ -27,7 +27,7 @@ function Navbar() {
     <header className="navbar">
       <div className="navbar-container">
         <NavLink to="/" className="navbar-logo">
-          Prenom Nom
+          Belisa Wagner
         </NavLink>
 
         {/* Desktop nav */}
