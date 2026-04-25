@@ -37,3 +37,7 @@ coverage/
 # Temp files
 *.tmp
 .claude/
+
+# Local-only secrets / one-shot setup scripts
+scripts/local/
+
