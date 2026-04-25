@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Navbar from './components/Navbar.jsx'
@@ -9,7 +10,18 @@ import Post from './pages/Post.jsx'
 import Guestbook from './pages/Guestbook.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import RequireRole from './components/RequireRole.jsx'
 import NotFound from './pages/NotFound.jsx'
+
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout.jsx'))
+const PostsList = lazy(() => import('./pages/admin/PostsList.jsx'))
+const PostEditor = lazy(() => import('./pages/admin/PostEditor.jsx'))
+const Users = lazy(() => import('./pages/admin/Users.jsx'))
+const Moderation = lazy(() => import('./pages/admin/Moderation.jsx'))
+
+const AdminFallback = () => (
+  <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>Chargement…</div>
+)
 
 const pageTransition = {
   initial: { opacity: 0 },
@@ -40,6 +52,25 @@ function App() {
               <Route path="/livre-d-or" element={<Guestbook />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/admin" element={
+                <RequireRole roles={['admin', 'author']}>
+                  <Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>
+                </RequireRole>
+              }>
+                <Route index element={<Suspense fallback={<AdminFallback />}><PostsList /></Suspense>} />
+                <Route path="new" element={<Suspense fallback={<AdminFallback />}><PostEditor /></Suspense>} />
+                <Route path="posts/:id" element={<Suspense fallback={<AdminFallback />}><PostEditor /></Suspense>} />
+                <Route path="users" element={
+                  <RequireRole roles={['admin']}>
+                    <Suspense fallback={<AdminFallback />}><Users /></Suspense>
+                  </RequireRole>
+                } />
+                <Route path="moderation" element={
+                  <RequireRole roles={['admin']}>
+                    <Suspense fallback={<AdminFallback />}><Moderation /></Suspense>
+                  </RequireRole>
+                } />
+              </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>
