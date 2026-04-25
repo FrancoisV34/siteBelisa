@@ -4,6 +4,8 @@ import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import Oeuvres from './pages/Oeuvres.jsx'
+import Blog from './pages/Blog.jsx'
+import Post from './pages/Post.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 const pageTransition = {
@@ -30,6 +32,8 @@ function App() {
             <Routes location={location}>
               <Route path="/" element={<Home />} />
               <Route path="/oeuvres" element={<Oeuvres />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/:slug" element={<Post />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>

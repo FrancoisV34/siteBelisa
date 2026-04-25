@@ -21,6 +21,7 @@ function Navbar() {
   const navItems = [
     { to: '/', label: 'Accueil', end: true },
     { to: '/oeuvres', label: 'Oeuvres', end: false },
+    { to: '/blog', label: 'Blog', end: false },
   ]
 
   return (
