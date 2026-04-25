@@ -117,7 +117,7 @@ function Oeuvres() {
         variants={staggerGrid}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.05 }}
+        viewport={{ once: true, amount: "some" }}
       >
         {oeuvres.map((oeuvre) => (
           <motion.article

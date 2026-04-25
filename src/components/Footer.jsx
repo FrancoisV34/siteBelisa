@@ -24,7 +24,7 @@ function Footer() {
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: "some" }}
           custom={0}
         >
           <h3>Belisa Wagner</h3>
@@ -35,7 +35,7 @@ function Footer() {
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: "some" }}
           custom={1}
         >
           <h3>Contact</h3>
@@ -47,7 +47,7 @@ function Footer() {
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.3 }}
+          viewport={{ once: true, amount: "some" }}
           custom={2}
         >
           <h3>Suivez-moi</h3>

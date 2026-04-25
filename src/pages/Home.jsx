@@ -61,7 +61,7 @@ function Home() {
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, amount: "some" }}
           >
             <img
               src="/photo-belisa.jpg"
@@ -75,7 +75,7 @@ function Home() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: "some" }}
           >
             <motion.h2 variants={fadeUp}>A propos</motion.h2>
             <motion.p variants={fadeUp}>
@@ -106,7 +106,7 @@ function Home() {
           variants={fadeUp}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ once: true, amount: "some" }}
         >
           En quelques chiffres
         </motion.h2>
@@ -116,7 +116,7 @@ function Home() {
           variants={staggerContainer}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
+          viewport={{ once: true, amount: "some" }}
         >
           {[
             { number: '50+', label: 'Oeuvres realisees' },
