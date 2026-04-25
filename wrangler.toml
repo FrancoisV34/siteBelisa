@@ -5,5 +5,5 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "site-belisa"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "c7073605-f053-4e15-9149-9a5153467237"
 migrations_dir = "migrations"
