@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    // Encode le chemin courant dans la query string pour que index.html puisse le restaurer
+    var l = window.location;
+    l.replace(
+      l.protocol + '//' + l.host +
+      '/siteBelisa/' +
+      '?p=' + encodeURIComponent(l.pathname.replace('/siteBelisa', '') + l.search) +
+      (l.hash ? '&h=' + encodeURIComponent(l.hash) : '')
+    );
+  </script>
+</head>
+<body></body>
+</html>

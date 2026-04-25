@@ -4,6 +4,7 @@ import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
 import Oeuvres from './pages/Oeuvres.jsx'
+import NotFound from './pages/NotFound.jsx'
 
 const pageTransition = {
   initial: { opacity: 0 },
@@ -29,6 +30,7 @@ function App() {
             <Routes location={location}>
               <Route path="/" element={<Home />} />
               <Route path="/oeuvres" element={<Oeuvres />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>
         </AnimatePresence>
