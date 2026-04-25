@@ -10,6 +10,8 @@ export default function AdminLayout() {
         <nav>
           <NavLink to="/admin" end className={({ isActive }) => isActive ? 'active' : ''}>Articles</NavLink>
           <NavLink to="/admin/new" className={({ isActive }) => isActive ? 'active' : ''}>Nouvel article</NavLink>
+          <NavLink to="/admin/home" className={({ isActive }) => isActive ? 'active' : ''}>Accueil</NavLink>
+          <NavLink to="/admin/oeuvres" className={({ isActive }) => isActive ? 'active' : ''}>Œuvres</NavLink>
           {user?.role === 'admin' && (
             <>
               <NavLink to="/admin/users" className={({ isActive }) => isActive ? 'active' : ''}>Utilisateurs</NavLink>

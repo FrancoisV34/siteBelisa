@@ -18,6 +18,10 @@ const PostsList = lazy(() => import('./pages/admin/PostsList.jsx'))
 const PostEditor = lazy(() => import('./pages/admin/PostEditor.jsx'))
 const Users = lazy(() => import('./pages/admin/Users.jsx'))
 const Moderation = lazy(() => import('./pages/admin/Moderation.jsx'))
+const HomeEditor = lazy(() => import('./pages/admin/HomeEditor.jsx'))
+const HomeSectionEditor = lazy(() => import('./pages/admin/HomeSectionEditor.jsx'))
+const OeuvresList = lazy(() => import('./pages/admin/OeuvresList.jsx'))
+const OeuvreEditor = lazy(() => import('./pages/admin/OeuvreEditor.jsx'))
 
 const AdminFallback = () => (
   <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>Chargement…</div>
@@ -60,6 +64,12 @@ function App() {
                 <Route index element={<Suspense fallback={<AdminFallback />}><PostsList /></Suspense>} />
                 <Route path="new" element={<Suspense fallback={<AdminFallback />}><PostEditor /></Suspense>} />
                 <Route path="posts/:id" element={<Suspense fallback={<AdminFallback />}><PostEditor /></Suspense>} />
+                <Route path="home" element={<Suspense fallback={<AdminFallback />}><HomeEditor /></Suspense>} />
+                <Route path="home/sections/new" element={<Suspense fallback={<AdminFallback />}><HomeSectionEditor /></Suspense>} />
+                <Route path="home/sections/:id" element={<Suspense fallback={<AdminFallback />}><HomeSectionEditor /></Suspense>} />
+                <Route path="oeuvres" element={<Suspense fallback={<AdminFallback />}><OeuvresList /></Suspense>} />
+                <Route path="oeuvres/new" element={<Suspense fallback={<AdminFallback />}><OeuvreEditor /></Suspense>} />
+                <Route path="oeuvres/:id" element={<Suspense fallback={<AdminFallback />}><OeuvreEditor /></Suspense>} />
                 <Route path="users" element={
                   <RequireRole roles={['admin']}>
                     <Suspense fallback={<AdminFallback />}><Users /></Suspense>

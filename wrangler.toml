@@ -7,3 +7,7 @@ binding = "DB"
 database_name = "site-belisa"
 database_id = "c7073605-f053-4e15-9149-9a5153467237"
 migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "belisa-assets"

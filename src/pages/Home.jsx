@@ -1,36 +1,36 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
-/* ---- Animation variants ---- */
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] } },
 }
 
 const staggerContainer = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.12 },
-  },
+  visible: { transition: { staggerChildren: 0.12 } },
 }
 
 const scaleIn = {
   hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      type: 'spring',
-      stiffness: 300,
-      damping: 30,
-    },
-  },
+  visible: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 30 } },
 }
 
 function Home() {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetch('/api/site/home')
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(setData)
+      .catch((e) => setError(e.message))
+  }, [])
+
+  const hero = data?.hero || { title: 'Belisa Wagner', subtitle: '' }
+  const sections = data?.sections || []
+  const stats = data?.stats || []
+
   return (
     <div className="page home-page">
       {/* Hero */}
@@ -41,102 +41,89 @@ function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
         >
-          <h1>Belisa Wagner</h1>
-          <motion.p
-            className="hero-subtitle"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-          >
-            Artiste &bull; Createur &bull; Visionnaire
-          </motion.p>
+          <h1>{hero.title}</h1>
+          {hero.subtitle && (
+            <motion.p
+              className="hero-subtitle"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+            >
+              {hero.subtitle}
+            </motion.p>
+          )}
         </motion.div>
       </section>
 
-      {/* A propos */}
-      <section className="about">
-        <div className="about-container">
-          <motion.div
-            className="about-image"
+      {error && <p className="blog-error" style={{ textAlign: 'center', padding: '2rem' }}>Erreur : {error}</p>}
+
+      {/* Sections (about + extras) */}
+      {sections.map((sec, i) => (
+        <section key={sec.id} className={`about ${i % 2 === 1 ? 'about-reverse' : ''}`}>
+          <div className="about-container">
+            {sec.image_url && (
+              <motion.div
+                className="about-image"
+                variants={fadeUp}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 'some' }}
+              >
+                <img src={sec.image_url} alt={sec.title} className="about-photo" />
+              </motion.div>
+            )}
+            <motion.div
+              className="about-text"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 'some' }}
+            >
+              <motion.h2 variants={fadeUp}>{sec.title}</motion.h2>
+              <motion.div
+                variants={fadeUp}
+                className="about-body"
+                dangerouslySetInnerHTML={{ __html: sec.body_html }}
+              />
+            </motion.div>
+          </div>
+        </section>
+      ))}
+
+      {/* Chiffres */}
+      {stats.length > 0 && (
+        <section className="highlights">
+          <motion.h2
             variants={fadeUp}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: "some" }}
+            viewport={{ once: true, amount: 'some' }}
           >
-            <img
-              src="/photo-belisa.jpg"
-              alt="Belisa Wagner"
-              className="about-photo"
-            />
-          </motion.div>
+            En quelques chiffres
+          </motion.h2>
 
           <motion.div
-            className="about-text"
+            className="highlights-grid"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, amount: "some" }}
+            viewport={{ once: true, amount: 'some' }}
           >
-            <motion.h2 variants={fadeUp}>A propos</motion.h2>
-            <motion.p variants={fadeUp}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-              ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-              aliquip ex ea commodo consequat.
-            </motion.p>
-            <motion.p variants={fadeUp}>
-              Duis aute irure dolor in reprehenderit in voluptate velit esse
-              cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-              cupidatat non proident, sunt in culpa qui officia deserunt mollit
-              anim id est laborum.
-            </motion.p>
-            <motion.p variants={fadeUp}>
-              Nee au coeur de Paris, cette passion pour l'art s'est developpee
-              des le plus jeune age. Apres des etudes aux Beaux-Arts, un parcours
-              riche en expositions et en collaborations a forge une identite
-              artistique unique, entre tradition et modernite.
-            </motion.p>
+            {stats.map((item) => (
+              <motion.div
+                key={item.id}
+                className="highlight-card"
+                variants={scaleIn}
+                whileHover={{ y: -4, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+              >
+                <span className="highlight-number">{item.number}</span>
+                <span className="highlight-label">{item.label}</span>
+              </motion.div>
+            ))}
           </motion.div>
-        </div>
-      </section>
-
-      {/* Chiffres */}
-      <section className="highlights">
-        <motion.h2
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: "some" }}
-        >
-          En quelques chiffres
-        </motion.h2>
-
-        <motion.div
-          className="highlights-grid"
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: "some" }}
-        >
-          {[
-            { number: '50+', label: 'Oeuvres realisees' },
-            { number: '20+', label: 'Expositions' },
-            { number: '15', label: "Annees d'experience" },
-            { number: '5', label: 'Prix et distinctions' },
-          ].map((item) => (
-            <motion.div
-              key={item.label}
-              className="highlight-card"
-              variants={scaleIn}
-              whileHover={{ y: -4, boxShadow: '0 8px 32px rgba(0,0,0,0.12)' }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-            >
-              <span className="highlight-number">{item.number}</span>
-              <span className="highlight-label">{item.label}</span>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }

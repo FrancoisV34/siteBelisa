@@ -26,17 +26,31 @@ Dashboard web Cloudflare → https://dash.cloudflare.com/
 
 À ce stade le site est déployé mais les routes `/api/*` retourneront 500 parce que la D1 n'est pas encore liée.
 
-## 2. Lier la D1 au projet Pages
+## 2. Lier la D1 et le bucket R2 au projet Pages
 
 Dans le dashboard du projet Pages (toujours dans le navigateur) :
 
+### D1 binding
 1. **Settings** du projet → **Bindings** (ou **Functions** → **D1 database bindings** selon la version)
 2. **Add binding** :
    - Variable name : `DB`
    - D1 database : `site-belisa`
-3. **Important** : faire la même chose pour **Production** ET **Preview** (deux entrées séparées)
+3. **Important** : faire pour **Production** ET **Preview** (deux entrées séparées)
+
+### R2 binding (pour les images uploadées)
+1. Toujours dans **Settings → Bindings** (section **R2**)
+2. **Add binding** :
+   - Variable name : `MEDIA`
+   - R2 bucket : `belisa-assets`
+3. Pour **Production** ET **Preview**
+
+### Apply
 4. Sauvegarder
-5. Aller dans **Deployments** → sur le dernier déploiement, clic sur les `…` → **Retry deployment** (sinon le binding ne prend pas effet sur le déploiement existant)
+5. **Deployments** → sur le dernier déploiement, clic sur les `…` → **Retry deployment** (sinon les bindings ne prennent pas effet)
+
+### Si le bucket R2 n'existe pas encore
+- Si tu démarres à zéro, active R2 d'abord : Dashboard CF → **R2 Object Storage** → **Add R2 subscription** (gratuit jusqu'à 10 GB).
+- Puis crée le bucket : `npx wrangler r2 bucket create belisa-assets`
 
 ## 3. Appliquer les migrations en prod
 
