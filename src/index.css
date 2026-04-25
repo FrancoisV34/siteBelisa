@@ -752,3 +752,202 @@ img {
   .post-page { padding: 2rem 1.25rem 4rem; }
   .post-cover { margin: 0 -1.25rem 2rem; border-radius: 0; }
 }
+
+/* ===== Auth ===== */
+.auth-page {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+}
+
+.auth-form {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.auth-form h1 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.auth-form label span { color: var(--color-text-light); }
+
+.auth-form input,
+.auth-form textarea {
+  padding: 0.7rem 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
+  color: var(--color-text);
+}
+
+.auth-form input:focus,
+.auth-form textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.auth-error {
+  background: #fdecea;
+  color: #b00020;
+  padding: 0.6rem 0.875rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+.auth-switch a {
+  color: var(--color-accent);
+  text-decoration: underline;
+}
+
+.nav-link-btn,
+.mobile-nav-link-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+/* ===== Likes ===== */
+.post-actions {
+  margin: 2.5rem 0;
+  display: flex;
+  gap: 1rem;
+}
+
+.like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.like-btn:hover:not(:disabled) {
+  border-color: #e63946;
+  color: #e63946;
+}
+
+.like-btn.liked {
+  border-color: #e63946;
+  color: #e63946;
+  background: #fff5f5;
+}
+
+.like-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* ===== Comments ===== */
+.comments {
+  margin-top: 3rem;
+  padding-top: 2.5rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.comments h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+}
+
+.comments-list { list-style: none; padding: 0; margin: 0 0 2rem; }
+
+.comment {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.comment:last-child { border-bottom: none; }
+
+.comment-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.875rem;
+}
+
+.comment-author { font-weight: 500; }
+.comment-date { color: var(--color-text-light); }
+.comment-body { line-height: 1.6; white-space: pre-wrap; }
+
+.comments-empty,
+.comments-login {
+  color: var(--color-text-light);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.comments-login a { color: var(--color-accent); text-decoration: underline; font-style: normal; }
+
+.comment-form,
+.guestbook-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.comment-form textarea,
+.guestbook-form textarea {
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
+.comment-form button,
+.guestbook-form button {
+  align-self: flex-end;
+}
+
+/* ===== Guestbook ===== */
+.guestbook-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem;
+}
+
+.guestbook-list { list-style: none; padding: 0; margin-top: 2.5rem; display: grid; gap: 1.25rem; }
+
+.guestbook-entry {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+}
+
+.guestbook-message { line-height: 1.6; white-space: pre-wrap; }
+.guestbook-meta { color: var(--color-text-light); font-size: 0.875rem; margin-top: 0.5rem; }

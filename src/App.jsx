@@ -6,6 +6,9 @@ import Home from './pages/Home.jsx'
 import Oeuvres from './pages/Oeuvres.jsx'
 import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
+import Guestbook from './pages/Guestbook.jsx'
+import Login from './pages/Login.jsx'
+import Register from './pages/Register.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 const pageTransition = {
@@ -34,6 +37,9 @@ function App() {
               <Route path="/oeuvres" element={<Oeuvres />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<Post />} />
+              <Route path="/livre-d-or" element={<Guestbook />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </motion.div>

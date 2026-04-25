@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const { user, logout } = useAuth()
 
   // Fermer le menu à chaque changement de route
   useEffect(() => {
@@ -22,7 +24,10 @@ function Navbar() {
     { to: '/', label: 'Accueil', end: true },
     { to: '/oeuvres', label: 'Oeuvres', end: false },
     { to: '/blog', label: 'Blog', end: false },
+    { to: '/livre-d-or', label: "Livre d'or", end: false },
   ]
+
+  const isAdminOrAuthor = user && (user.role === 'admin' || user.role === 'author')
 
   return (
     <header className="navbar">
@@ -45,6 +50,18 @@ function Navbar() {
               {item.label}
             </NavLink>
           ))}
+          {isAdminOrAuthor && (
+            <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Admin
+            </NavLink>
+          )}
+          {user ? (
+            <button type="button" className="nav-link nav-link-btn" onClick={logout}>
+              Déconnexion
+            </button>
+          ) : (
+            <Link to="/login" className="nav-link">Connexion</Link>
+          )}
         </nav>
 
         {/* Burger button */}
@@ -114,6 +131,32 @@ function Navbar() {
                   </NavLink>
                 </motion.div>
               ))}
+              {isAdminOrAuthor && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + navItems.length * 0.08, duration: 0.3 }}
+                >
+                  <NavLink to="/admin" className={({ isActive }) => isActive ? 'mobile-nav-link active' : 'mobile-nav-link'} onClick={() => setMenuOpen(false)}>
+                    Admin
+                  </NavLink>
+                </motion.div>
+              )}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 + (navItems.length + 1) * 0.08, duration: 0.3 }}
+              >
+                {user ? (
+                  <button type="button" className="mobile-nav-link mobile-nav-link-btn" onClick={() => { logout(); setMenuOpen(false) }}>
+                    Déconnexion
+                  </button>
+                ) : (
+                  <Link to="/login" className="mobile-nav-link" onClick={() => setMenuOpen(false)}>
+                    Connexion
+                  </Link>
+                )}
+              </motion.div>
             </div>
           </motion.nav>
         )}

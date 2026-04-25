@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import LikeButton from '../components/LikeButton.jsx'
+import CommentSection from '../components/CommentSection.jsx'
 
 function formatDate(ts) {
   if (!ts) return ''
@@ -69,6 +71,10 @@ export default function Post() {
           className="post-content"
           dangerouslySetInnerHTML={{ __html: post.content_html }}
         />
+        <div className="post-actions">
+          <LikeButton postId={post.id} />
+        </div>
+        <CommentSection postId={post.id} />
         <footer className="post-footer">
           <Link to="/blog" className="btn btn-secondary">← Retour au blog</Link>
         </footer>
