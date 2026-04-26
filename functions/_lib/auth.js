@@ -68,7 +68,7 @@ export async function getCurrentUser(request, env) {
   if (!token) return null
   const now = Math.floor(Date.now() / 1000)
   const row = await env.DB.prepare(
-    `SELECT u.id, u.email, u.display_name, u.role, u.status, s.token
+    `SELECT u.id, u.email, u.display_name, u.role, u.status, u.created_at, s.token
      FROM sessions s JOIN users u ON u.id = s.user_id
      WHERE s.token = ? AND s.expires_at > ?`
   ).bind(token, now).first()

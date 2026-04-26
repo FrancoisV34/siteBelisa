@@ -3,18 +3,15 @@ import { NavLink, useLocation, Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import UserMenu from './UserMenu.jsx'
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
 
-  // Fermer le menu à chaque changement de route
-  useEffect(() => {
-    setMenuOpen(false)
-  }, [location.pathname])
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
-  // Empêcher le scroll quand le menu est ouvert
   useEffect(() => {
     document.body.style.overflow = menuOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -43,9 +40,7 @@ function Navbar() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) =>
-                isActive ? 'nav-link active' : 'nav-link'
-              }
+              className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}
             >
               {item.label}
             </NavLink>
@@ -55,48 +50,45 @@ function Navbar() {
               Admin
             </NavLink>
           )}
-          {user ? (
-            <button type="button" className="nav-link nav-link-btn" onClick={logout}>
-              Déconnexion
-            </button>
-          ) : (
-            <Link to="/login" className="nav-link">Connexion</Link>
-          )}
+          {user ? <UserMenu /> : <Link to="/login" className="nav-link">Connexion</Link>}
         </nav>
 
-        {/* Burger button */}
-        <button
-          className="burger-btn"
-          onClick={() => setMenuOpen((prev) => !prev)}
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={menuOpen}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {menuOpen ? (
-              <motion.span
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                style={{ display: 'flex' }}
-              >
-                <X size={24} />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="menu"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                style={{ display: 'flex' }}
-              >
-                <Menu size={24} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
+        {/* Mobile right cluster: avatar (if user) + burger */}
+        <div className="navbar-mobile-right">
+          {user && <UserMenu />}
+          <button
+            className="burger-btn"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={menuOpen}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {menuOpen ? (
+                <motion.span
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ display: 'flex' }}
+                >
+                  <X size={24} />
+                </motion.span>
+              ) : (
+                <motion.span
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ display: 'flex' }}
+                >
+                  <Menu size={24} />
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu overlay */}
@@ -120,11 +112,7 @@ function Navbar() {
                   <NavLink
                     to={item.to}
                     end={item.end}
-                    className={({ isActive }) =>
-                      isActive
-                        ? 'mobile-nav-link active'
-                        : 'mobile-nav-link'
-                    }
+                    className={({ isActive }) => isActive ? 'mobile-nav-link active' : 'mobile-nav-link'}
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.label}
@@ -137,26 +125,26 @@ function Navbar() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 + navItems.length * 0.08, duration: 0.3 }}
                 >
-                  <NavLink to="/admin" className={({ isActive }) => isActive ? 'mobile-nav-link active' : 'mobile-nav-link'} onClick={() => setMenuOpen(false)}>
+                  <NavLink
+                    to="/admin"
+                    className={({ isActive }) => isActive ? 'mobile-nav-link active' : 'mobile-nav-link'}
+                    onClick={() => setMenuOpen(false)}
+                  >
                     Admin
                   </NavLink>
                 </motion.div>
               )}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 + (navItems.length + 1) * 0.08, duration: 0.3 }}
-              >
-                {user ? (
-                  <button type="button" className="mobile-nav-link mobile-nav-link-btn" onClick={() => { logout(); setMenuOpen(false) }}>
-                    Déconnexion
-                  </button>
-                ) : (
+              {!user && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 + (navItems.length + 1) * 0.08, duration: 0.3 }}
+                >
                   <Link to="/login" className="mobile-nav-link" onClick={() => setMenuOpen(false)}>
                     Connexion
                   </Link>
-                )}
-              </motion.div>
+                </motion.div>
+              )}
             </div>
           </motion.nav>
         )}

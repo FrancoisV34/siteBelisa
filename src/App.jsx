@@ -10,7 +10,9 @@ import Post from './pages/Post.jsx'
 import Guestbook from './pages/Guestbook.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
+import Profile from './pages/Profile.jsx'
 import RequireRole from './components/RequireRole.jsx'
+import RequireAuth from './components/RequireAuth.jsx'
 import NotFound from './pages/NotFound.jsx'
 
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout.jsx'))
@@ -56,6 +58,7 @@ function App() {
               <Route path="/livre-d-or" element={<Guestbook />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/profil" element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path="/admin" element={
                 <RequireRole roles={['admin']}>
                   <Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>

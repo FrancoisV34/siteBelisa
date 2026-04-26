@@ -51,8 +51,21 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const updateProfile = async (patch) => {
+    const r = await fetch('/api/auth/me', {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(patch),
+    })
+    const data = await r.json()
+    if (!r.ok) throw new Error(data.error || 'Update failed')
+    setUser((prev) => ({ ...prev, ...data.user }))
+    return data.user
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh, updateProfile }}>
       {children}
     </AuthContext.Provider>
   )
