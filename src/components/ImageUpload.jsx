@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react'
-import { Upload, X } from 'lucide-react'
+import { Upload, X, Image as ImageIcon } from 'lucide-react'
+
+const ACCEPTED = 'image/jpeg,image/png,image/webp,image/gif'
 
 export default function ImageUpload({ value, onChange, label = 'Image' }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
+  const [dragOver, setDragOver] = useState(false)
   const inputRef = useRef(null)
 
   const upload = async (file) => {
@@ -28,10 +31,18 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
     }
   }
 
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) upload(file)
+  }
+
   return (
     <div className="image-upload">
       <span className="image-upload-label">{label}</span>
-      {value && (
+
+      {value ? (
         <div className="image-upload-preview">
           <img src={value} alt="" />
           <button
@@ -43,29 +54,55 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
             <X size={16} />
           </button>
         </div>
-      )}
-      <div className="image-upload-actions">
+      ) : (
         <button
           type="button"
-          className="btn btn-secondary"
+          className={`image-upload-dropzone ${dragOver ? 'is-dragover' : ''} ${uploading ? 'is-uploading' : ''}`}
+          onClick={() => inputRef.current?.click()}
+          onDragEnter={(e) => { e.preventDefault(); setDragOver(true) }}
+          onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+          onDragLeave={(e) => { e.preventDefault(); setDragOver(false) }}
+          onDrop={handleDrop}
+          disabled={uploading}
+        >
+          {uploading ? (
+            <span className="image-upload-hint">Envoi en cours…</span>
+          ) : (
+            <>
+              <ImageIcon size={28} />
+              <span className="image-upload-hint">
+                <strong>Cliquez</strong> pour parcourir ou <strong>déposez</strong> une image ici
+              </span>
+              <span className="image-upload-sub">JPG, PNG, WEBP, GIF · max 5 Mo</span>
+            </>
+          )}
+        </button>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept={ACCEPTED}
+        style={{ display: 'none' }}
+        onChange={(e) => {
+          const f = e.target.files?.[0]
+          if (f) upload(f)
+          e.target.value = ''
+        }}
+      />
+
+      {value && (
+        <button
+          type="button"
+          className="btn btn-secondary image-upload-replace"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
         >
           <Upload size={16} />
-          <span>{uploading ? 'Envoi…' : value ? 'Remplacer' : 'Téléverser une image'}</span>
+          <span>{uploading ? 'Envoi…' : 'Remplacer'}</span>
         </button>
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          style={{ display: 'none' }}
-          onChange={(e) => {
-            const f = e.target.files?.[0]
-            if (f) upload(f)
-            e.target.value = ''
-          }}
-        />
-      </div>
+      )}
+
       <input
         type="text"
         className="image-upload-url"

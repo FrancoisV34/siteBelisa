@@ -54,7 +54,7 @@ function Oeuvres() {
 
       {oeuvres && oeuvres.length > 0 && (
         <motion.section
-          className="oeuvres-grid"
+          className={`oeuvres-grid ${oeuvres.length % 2 === 0 ? 'even' : 'odd'}`}
           variants={staggerGrid}
           initial="hidden"
           whileInView="visible"
