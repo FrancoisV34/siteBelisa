@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../../../../_lib/json.js'
 import { adminOnly } from '../../../../_lib/admin-gate.js'
+import { sanitizePlainText } from '../../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -21,8 +22,8 @@ export async function onRequestPost({ request, env }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const number = String(body.number || '').trim().slice(0, 20)
-    const label = String(body.label || '').trim().slice(0, 80)
+    const number = sanitizePlainText(body.number).trim().slice(0, 20)
+    const label = sanitizePlainText(body.label).trim().slice(0, 80)
     if (!number || !label) return badRequest('Number and label required')
 
     const max = await env.DB.prepare(

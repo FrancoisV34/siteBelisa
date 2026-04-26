@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../../../_lib/json.js'
 import { requireUser, requireRole } from '../../../_lib/auth.js'
+import { sanitizePlainText } from '../../../_lib/sanitize.js'
 
 const KEYS = ['home.hero_title', 'home.hero_subtitle']
 
@@ -36,8 +37,8 @@ export async function onRequestPatch({ request, env }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = String(body.title ?? '').trim().slice(0, 200)
-    const subtitle = String(body.subtitle ?? '').trim().slice(0, 300)
+    const title = sanitizePlainText(body.title).trim().slice(0, 200)
+    const subtitle = sanitizePlainText(body.subtitle).trim().slice(0, 300)
     if (!title) return badRequest('Title is required')
 
     const now = Math.floor(Date.now() / 1000)

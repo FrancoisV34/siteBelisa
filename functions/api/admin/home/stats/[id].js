@@ -1,5 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../../_lib/json.js'
 import { adminOnly } from '../../../../_lib/admin-gate.js'
+import { sanitizePlainText } from '../../../../_lib/sanitize.js'
 
 export async function onRequestPatch({ request, env, params }) {
   try {
@@ -12,8 +13,8 @@ export async function onRequestPatch({ request, env, params }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const number = body.number !== undefined ? String(body.number).trim().slice(0, 20) : existing.number
-    const label = body.label !== undefined ? String(body.label).trim().slice(0, 80) : existing.label
+    const number = body.number !== undefined ? sanitizePlainText(body.number).trim().slice(0, 20) : existing.number
+    const label = body.label !== undefined ? sanitizePlainText(body.label).trim().slice(0, 80) : existing.label
     if (!number || !label) return badRequest('Number and label required')
 
     const now = Math.floor(Date.now() / 1000)

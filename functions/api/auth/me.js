@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../../_lib/json.js'
 import { getCurrentUser } from '../../_lib/auth.js'
+import { sanitizePlainText } from '../../_lib/sanitize.js'
 
 function userPayload(u) {
   return {
@@ -25,7 +26,7 @@ export async function onRequestPatch({ request, env }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const displayName = String(body.display_name ?? '').trim()
+    const displayName = sanitizePlainText(body.display_name).trim()
     if (displayName.length < 2 || displayName.length > 60) {
       return badRequest('Display name must be 2-60 characters')
     }

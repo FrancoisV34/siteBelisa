@@ -70,6 +70,32 @@ npx wrangler d1 migrations apply site-belisa --remote  # prod
 
 Ne jamais modifier une migration déjà appliquée — créer une nouvelle migration à la place.
 
+### Ordre de déploiement code ↔ migration
+
+⚠️ **Cloudflare Pages n'applique pas les migrations automatiquement** au déploiement. Si une PR contient à la fois une nouvelle migration **et** du code qui dépend des nouvelles colonnes, il y a une fenêtre où le code en prod plante (colonne inconnue).
+
+Procédure correcte à chaque fois qu'une migration est mergée sur `main` :
+
+```bash
+# 1. Push le code → Pages déploie automatiquement (peut planter le temps de l'étape 2)
+git push origin main
+
+# 2. IMMÉDIATEMENT après le push, appliquer la migration sur D1 prod
+npx wrangler d1 migrations apply site-belisa --remote
+```
+
+Pour minimiser la fenêtre d'erreur sur des migrations sensibles (ex. login, paiement), inverser :
+
+```bash
+# 1. Appliquer la migration EN PREMIER (la nouvelle colonne existe, code ancien l'ignore)
+npx wrangler d1 migrations apply site-belisa --remote
+
+# 2. Puis push le code qui utilise la nouvelle colonne
+git push origin main
+```
+
+Cette stratégie ne marche que si la migration est **additive** (ALTER TABLE ADD COLUMN avec DEFAULT, CREATE TABLE, CREATE INDEX). Pour des migrations destructrices (DROP COLUMN, RENAME), prévoir une fenêtre de maintenance.
+
 ## Sécurité — règles à suivre
 
 - **Toujours `.bind()` les paramètres SQL** — jamais de concaténation

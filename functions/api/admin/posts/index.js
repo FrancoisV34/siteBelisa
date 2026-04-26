@@ -1,6 +1,7 @@
 import { json, badRequest, serverError } from '../../../_lib/json.js'
 import { requireUser, requireRole } from '../../../_lib/auth.js'
 import { slugify, uniqueSlug } from '../../../_lib/slug.js'
+import { sanitizeRichText, sanitizePlainText } from '../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -38,9 +39,9 @@ export async function onRequestPost({ request, env }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = String(body.title || '').trim()
-    const contentHtml = String(body.content_html || '').trim()
-    const excerpt = body.excerpt ? String(body.excerpt).trim().slice(0, 300) : null
+    const title = sanitizePlainText(body.title).trim()
+    const contentHtml = sanitizeRichText(String(body.content_html || '').trim())
+    const excerpt = body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null
     const coverImage = body.cover_image ? String(body.cover_image).trim().slice(0, 500) : null
     const status = body.status === 'published' ? 'published' : 'draft'
 

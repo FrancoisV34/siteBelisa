@@ -1,5 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
+import { sanitizePlainText } from '../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
@@ -25,11 +26,11 @@ export async function onRequestPatch({ request, env, params }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = body.title !== undefined ? String(body.title).trim() : existing.title
+    const title = body.title !== undefined ? sanitizePlainText(body.title).trim() : existing.title
     const year = body.year !== undefined ? (body.year ? parseInt(body.year, 10) || null : null) : existing.year
-    const technique = body.technique !== undefined ? (body.technique ? String(body.technique).trim().slice(0, 200) : null) : existing.technique
-    const dimensions = body.dimensions !== undefined ? (body.dimensions ? String(body.dimensions).trim().slice(0, 100) : null) : existing.dimensions
-    const description = body.description !== undefined ? (body.description ? String(body.description).trim().slice(0, 2000) : null) : existing.description
+    const technique = body.technique !== undefined ? (body.technique ? sanitizePlainText(body.technique).trim().slice(0, 200) : null) : existing.technique
+    const dimensions = body.dimensions !== undefined ? (body.dimensions ? sanitizePlainText(body.dimensions).trim().slice(0, 100) : null) : existing.dimensions
+    const description = body.description !== undefined ? (body.description ? sanitizePlainText(body.description).trim().slice(0, 2000) : null) : existing.description
     const imageUrl = body.image_url !== undefined ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null) : existing.image_url
     const bookUrl = body.book_url !== undefined ? (body.book_url ? String(body.book_url).trim().slice(0, 500) : null) : existing.book_url
     const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url

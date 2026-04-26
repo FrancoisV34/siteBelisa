@@ -1,5 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../../_lib/json.js'
 import { adminOnly } from '../../../../_lib/admin-gate.js'
+import { sanitizeRichText, sanitizePlainText } from '../../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
@@ -29,8 +30,8 @@ export async function onRequestPatch({ request, env, params }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = body.title !== undefined ? String(body.title).trim() : existing.title
-    const bodyHtml = body.body_html !== undefined ? String(body.body_html).trim() : existing.body_html
+    const title = body.title !== undefined ? sanitizePlainText(body.title).trim() : existing.title
+    const bodyHtml = body.body_html !== undefined ? sanitizeRichText(String(body.body_html).trim()) : existing.body_html
     const imageUrl = body.image_url !== undefined
       ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null)
       : existing.image_url

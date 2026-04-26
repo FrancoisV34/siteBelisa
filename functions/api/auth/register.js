@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../../_lib/json.js'
 import { hashPassword, createSession, sessionCookie } from '../../_lib/auth.js'
+import { sanitizePlainText } from '../../_lib/sanitize.js'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -10,7 +11,7 @@ export async function onRequestPost({ request, env }) {
 
     const email = String(body.email || '').trim().toLowerCase()
     const password = String(body.password || '')
-    const displayName = String(body.display_name || '').trim()
+    const displayName = sanitizePlainText(body.display_name).trim()
 
     if (!EMAIL_RE.test(email)) return badRequest('Invalid email')
     if (password.length < 8) return badRequest('Password must be at least 8 characters')

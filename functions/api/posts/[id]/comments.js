@@ -1,5 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { requireUser } from '../../../_lib/auth.js'
+import { sanitizePlainText } from '../../../_lib/sanitize.js'
 
 export async function onRequestGet({ env, params }) {
   try {
@@ -27,7 +28,7 @@ export async function onRequestPost({ request, env, params }) {
     if (!postId) return badRequest('Invalid post id')
 
     const body = await request.json().catch(() => null)
-    const content = String(body?.content || '').trim()
+    const content = sanitizePlainText(body?.content).trim()
     if (content.length < 1 || content.length > 2000) {
       return badRequest('Comment must be 1-2000 characters')
     }

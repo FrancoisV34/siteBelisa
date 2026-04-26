@@ -1,6 +1,7 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { requireUser, requireRole } from '../../../_lib/auth.js'
 import { slugify, uniqueSlug } from '../../../_lib/slug.js'
+import { sanitizeRichText, sanitizePlainText } from '../../../_lib/sanitize.js'
 
 async function loadAndCheck(env, params, user) {
   const id = parseInt(params.id, 10)
@@ -44,10 +45,10 @@ export async function onRequestPatch({ request, env, params }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = body.title !== undefined ? String(body.title).trim() : post.title
-    const contentHtml = body.content_html !== undefined ? String(body.content_html).trim() : post.content_html
+    const title = body.title !== undefined ? sanitizePlainText(body.title).trim() : post.title
+    const contentHtml = body.content_html !== undefined ? sanitizeRichText(String(body.content_html).trim()) : post.content_html
     const excerpt = body.excerpt !== undefined
-      ? (body.excerpt ? String(body.excerpt).trim().slice(0, 300) : null)
+      ? (body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null)
       : post.excerpt
     const coverImage = body.cover_image !== undefined
       ? (body.cover_image ? String(body.cover_image).trim().slice(0, 500) : null)

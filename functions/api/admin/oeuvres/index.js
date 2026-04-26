@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
+import { sanitizePlainText } from '../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -23,12 +24,12 @@ export async function onRequestPost({ request, env }) {
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')
 
-    const title = String(body.title || '').trim()
+    const title = sanitizePlainText(body.title).trim()
     if (!title) return badRequest('Title required')
     const year = body.year ? parseInt(body.year, 10) || null : null
-    const technique = body.technique ? String(body.technique).trim().slice(0, 200) : null
-    const dimensions = body.dimensions ? String(body.dimensions).trim().slice(0, 100) : null
-    const description = body.description ? String(body.description).trim().slice(0, 2000) : null
+    const technique = body.technique ? sanitizePlainText(body.technique).trim().slice(0, 200) : null
+    const dimensions = body.dimensions ? sanitizePlainText(body.dimensions).trim().slice(0, 100) : null
+    const description = body.description ? sanitizePlainText(body.description).trim().slice(0, 2000) : null
     const imageUrl = body.image_url ? String(body.image_url).trim().slice(0, 500) : null
     const bookUrl = body.book_url ? String(body.book_url).trim().slice(0, 500) : null
     const ebookUrl = body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null

@@ -1,5 +1,6 @@
 import { json, badRequest, serverError } from '../_lib/json.js'
 import { requireUser } from '../_lib/auth.js'
+import { sanitizePlainText } from '../_lib/sanitize.js'
 
 export async function onRequestGet({ env, request }) {
   try {
@@ -22,7 +23,7 @@ export async function onRequestPost({ request, env }) {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
     const body = await request.json().catch(() => null)
-    const message = String(body?.message || '').trim()
+    const message = sanitizePlainText(body?.message).trim()
     if (message.length < 1 || message.length > 500) {
       return badRequest('Message must be 1-500 characters')
     }
