@@ -6,7 +6,7 @@ export async function onRequestPost({ request, env }) {
   try {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
-    if (!requireRole(auth.user, 'admin', 'author')) {
+    if (!requireRole(auth.user, 'admin')) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
 

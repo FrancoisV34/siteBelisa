@@ -27,7 +27,7 @@ function Navbar() {
     { to: '/livre-d-or', label: "Livre d'or", end: false },
   ]
 
-  const isAdminOrAuthor = user && (user.role === 'admin' || user.role === 'author')
+  const isAdmin = user?.role === 'admin'
 
   return (
     <header className="navbar">
@@ -50,7 +50,7 @@ function Navbar() {
               {item.label}
             </NavLink>
           ))}
-          {isAdminOrAuthor && (
+          {isAdmin && (
             <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Admin
             </NavLink>
@@ -131,7 +131,7 @@ function Navbar() {
                   </NavLink>
                 </motion.div>
               ))}
-              {isAdminOrAuthor && (
+              {isAdmin && (
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}

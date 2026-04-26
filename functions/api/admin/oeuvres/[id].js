@@ -1,9 +1,9 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
-import { adminOrAuthor } from '../../../_lib/admin-gate.js'
+import { adminOnly } from '../../../_lib/admin-gate.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
-    const g = await adminOrAuthor(request, env)
+    const g = await adminOnly(request, env)
     if (g.error) return g.error
     const id = parseInt(params.id, 10)
     const row = await env.DB.prepare(`SELECT * FROM oeuvres WHERE id = ?`).bind(id).first()
@@ -16,7 +16,7 @@ export async function onRequestGet({ request, env, params }) {
 
 export async function onRequestPatch({ request, env, params }) {
   try {
-    const g = await adminOrAuthor(request, env)
+    const g = await adminOnly(request, env)
     if (g.error) return g.error
     const id = parseInt(params.id, 10)
     const existing = await env.DB.prepare(`SELECT * FROM oeuvres WHERE id = ?`).bind(id).first()
@@ -50,7 +50,7 @@ export async function onRequestPatch({ request, env, params }) {
 
 export async function onRequestDelete({ request, env, params }) {
   try {
-    const g = await adminOrAuthor(request, env)
+    const g = await adminOnly(request, env)
     if (g.error) return g.error
     const id = parseInt(params.id, 10)
     const r = await env.DB.prepare(`DELETE FROM oeuvres WHERE id = ?`).bind(id).run()

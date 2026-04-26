@@ -1,9 +1,9 @@
 import { json, badRequest, serverError } from '../../../../_lib/json.js'
-import { adminOrAuthor } from '../../../../_lib/admin-gate.js'
+import { adminOnly } from '../../../../_lib/admin-gate.js'
 
 export async function onRequestGet({ request, env }) {
   try {
-    const g = await adminOrAuthor(request, env)
+    const g = await adminOnly(request, env)
     if (g.error) return g.error
     const { results } = await env.DB.prepare(
       `SELECT id, title, body_html, image_url, position, status, updated_at
@@ -17,7 +17,7 @@ export async function onRequestGet({ request, env }) {
 
 export async function onRequestPost({ request, env }) {
   try {
-    const g = await adminOrAuthor(request, env)
+    const g = await adminOnly(request, env)
     if (g.error) return g.error
     const body = await request.json().catch(() => null)
     if (!body) return badRequest('Invalid JSON body')

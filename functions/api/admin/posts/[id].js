@@ -19,7 +19,7 @@ export async function onRequestGet({ request, env, params }) {
   try {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
-    if (!requireRole(auth.user, 'admin', 'author')) {
+    if (!requireRole(auth.user, 'admin')) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
     const r = await loadAndCheck(env, params, auth.user)
@@ -34,7 +34,7 @@ export async function onRequestPatch({ request, env, params }) {
   try {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
-    if (!requireRole(auth.user, 'admin', 'author')) {
+    if (!requireRole(auth.user, 'admin')) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
     const r = await loadAndCheck(env, params, auth.user)
@@ -82,7 +82,7 @@ export async function onRequestDelete({ request, env, params }) {
   try {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
-    if (!requireRole(auth.user, 'admin', 'author')) {
+    if (!requireRole(auth.user, 'admin')) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
     const r = await loadAndCheck(env, params, auth.user)

@@ -6,7 +6,7 @@ const KEYS = ['home.hero_title', 'home.hero_subtitle']
 async function gateAdminOrAuthor(request, env) {
   const auth = await requireUser(request, env)
   if (auth.error) return { error: auth.error }
-  if (!requireRole(auth.user, 'admin', 'author')) {
+  if (!requireRole(auth.user, 'admin')) {
     return { error: json({ error: 'Forbidden' }, { status: 403 }) }
   }
   return { user: auth.user }

@@ -57,7 +57,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/admin" element={
-                <RequireRole roles={['admin', 'author']}>
+                <RequireRole roles={['admin']}>
                   <Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>
                 </RequireRole>
               }>
