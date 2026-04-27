@@ -3,6 +3,8 @@ import { requireUser, requireRole } from '../../../_lib/auth.js'
 import { slugify, uniqueSlug } from '../../../_lib/slug.js'
 import { sanitizeRichText, sanitizePlainText } from '../../../_lib/sanitize.js'
 
+const ALLOWED_STATUSES = ['draft', 'pending', 'published']
+
 export async function onRequestGet({ request, env }) {
   try {
     const auth = await requireUser(request, env)
@@ -10,18 +12,25 @@ export async function onRequestGet({ request, env }) {
     if (!requireRole(auth.user, 'admin')) {
       return json({ error: 'Forbidden' }, { status: 403 })
     }
-    // Admins see all posts; authors see only their own
-    const sql = auth.user.role === 'admin'
-      ? `SELECT p.id, p.slug, p.title, p.status, p.published_at, p.updated_at, u.display_name AS author_name
-         FROM posts p JOIN users u ON u.id = p.author_id
-         ORDER BY p.updated_at DESC`
-      : `SELECT p.id, p.slug, p.title, p.status, p.published_at, p.updated_at, u.display_name AS author_name
-         FROM posts p JOIN users u ON u.id = p.author_id
-         WHERE p.author_id = ?
-         ORDER BY p.updated_at DESC`
-    const stmt = auth.user.role === 'admin'
-      ? env.DB.prepare(sql)
-      : env.DB.prepare(sql).bind(auth.user.id)
+    const url = new URL(request.url)
+    const statusFilter = url.searchParams.get('status')
+    const useStatus = ALLOWED_STATUSES.includes(statusFilter) ? statusFilter : null
+
+    const baseCols = `p.id, p.slug, p.title, p.status, p.published_at, p.updated_at, p.excerpt, p.cover_image, u.display_name AS author_name, p.author_id`
+    const whereParts = []
+    const bindings = []
+    if (auth.user.role !== 'admin') {
+      whereParts.push('p.author_id = ?')
+      bindings.push(auth.user.id)
+    }
+    if (useStatus) {
+      whereParts.push('p.status = ?')
+      bindings.push(useStatus)
+    }
+    const whereSql = whereParts.length ? `WHERE ${whereParts.join(' AND ')}` : ''
+    const sql = `SELECT ${baseCols} FROM posts p JOIN users u ON u.id = p.author_id ${whereSql} ORDER BY p.updated_at DESC`
+
+    const stmt = bindings.length ? env.DB.prepare(sql).bind(...bindings) : env.DB.prepare(sql)
     const { results } = await stmt.all()
     return json({ posts: results })
   } catch (e) {

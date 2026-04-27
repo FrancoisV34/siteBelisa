@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { PenLine } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import SubmitArticleModal from '../components/SubmitArticleModal.jsx'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -15,8 +18,11 @@ function formatDate(ts) {
 }
 
 export default function Blog() {
+  const { user } = useAuth()
   const [posts, setPosts] = useState(null)
   const [error, setError] = useState(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState(null)
 
   useEffect(() => {
     fetch('/api/posts')
@@ -43,6 +49,21 @@ export default function Blog() {
           Réflexions, actualités et coulisses de l'atelier.
         </motion.p>
       </section>
+
+      {user && (
+        <div className="blog-submit-bar">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setModalOpen(true)}
+          >
+            <PenLine size={16} style={{ marginRight: 6, verticalAlign: -3 }} />
+            Proposer un article
+          </button>
+        </div>
+      )}
+
+      {submitMessage && <p className="auth-success" style={{ maxWidth: 720, margin: '0 auto 1.5rem' }}>{submitMessage}</p>}
 
       <section className="blog-list">
         {error && <p className="blog-error">Impossible de charger les articles : {error}</p>}
@@ -76,6 +97,14 @@ export default function Blog() {
           </motion.article>
         ))}
       </section>
+
+      {modalOpen && (
+        <SubmitArticleModal
+          mode="create"
+          onClose={() => setModalOpen(false)}
+          onSuccess={() => setSubmitMessage('Proposition envoyée. Elle sera relue avant publication.')}
+        />
+      )}
     </div>
   )
 }

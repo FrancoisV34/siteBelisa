@@ -52,10 +52,19 @@ Profil utilisateur : artiste solo, faible volume, pas de PII sensible (pas de pa
   - `Cross-Origin-Opener-Policy: same-origin`
 
 ### Upload R2
+- Endpoint `/api/upload` ouvert à tout utilisateur authentifié (auparavant admin-only)
 - Validation MIME : `image/jpeg|png|webp|gif` uniquement
 - Validation taille : 5 Mo max
 - Clés UUID — pas de path traversal ni collision
 - Servi en `Cache-Control: public, max-age=31536000, immutable`
+- Rate limit Cloudflare recommandé (cf. §3.1)
+
+### Soumission d'articles utilisateur
+- Endpoint `POST /api/posts/submit` : auth requise, status forcé à `pending`
+- **Limite hard** : max 5 propositions `pending` simultanées par utilisateur (refus 429)
+- Sanitization : `sanitizePlainText` (titre, extrait) + `sanitizeRichText` (content_html)
+- Endpoints `/api/posts/mine/[id]` (PATCH/DELETE) : ownership stricte, refus 409 si statut autre que `pending`
+- Validation admin = simple changement de statut via `/api/admin/posts/[id]` PATCH (code existant)
 
 ### Logging / monitoring
 - **À améliorer** : aucun log structuré actuellement sur événements sensibles (login fail, admin action, upload). Cloudflare donne les access logs via dashboard mais sans détails métier.
@@ -74,7 +83,8 @@ Dashboard CF → projet `site-belisa` → **Security → WAF → Rate limiting r
 | Register abuse | `URI Path eq /api/auth/register` AND `Method eq POST` | 3 req / heure / IP | Block 1h |
 | Comment spam | `URI Path contains /comments` AND `Method eq POST` | 20 req / minute / IP | Block 5 min |
 | Guestbook spam | `URI Path eq /api/guestbook` AND `Method eq POST` | 10 req / minute / IP | Block 5 min |
-| Upload abuse | `URI Path eq /api/admin/upload` | 60 req / minute / IP | Block 5 min |
+| Upload abuse | `URI Path eq /api/upload` | 30 req / minute / IP | Block 5 min |
+| Submission spam | `URI Path eq /api/posts/submit` AND `Method eq POST` | 3 req / heure / IP | Block 1h |
 
 Ces règles tournent **en plus** du lockout par compte (qui protège un user spécifique) — elles protègent contre les attaques distribuées et les nouveaux comptes successifs.
 

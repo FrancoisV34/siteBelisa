@@ -1,14 +1,11 @@
-import { json, badRequest, serverError } from '../../_lib/json.js'
-import { requireUser, requireRole } from '../../_lib/auth.js'
-import { validateImage, makeKey, publicUrl } from '../../_lib/r2.js'
+import { json, badRequest, serverError } from '../_lib/json.js'
+import { requireUser } from '../_lib/auth.js'
+import { validateImage, makeKey, publicUrl } from '../_lib/r2.js'
 
 export async function onRequestPost({ request, env }) {
   try {
     const auth = await requireUser(request, env)
     if (auth.error) return auth.error
-    if (!requireRole(auth.user, 'admin')) {
-      return json({ error: 'Forbidden' }, { status: 403 })
-    }
 
     const form = await request.formData().catch(() => null)
     if (!form) return badRequest('Invalid form data')

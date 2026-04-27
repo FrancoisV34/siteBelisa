@@ -26,3 +26,8 @@ test('navigation between public pages works', async ({ page }) => {
   await page.getByRole('link', { name: /^Blog$/ }).click()
   await expect(page).toHaveURL(/\/blog$/)
 })
+
+test('blog page does not show "Proposer un article" button to anonymous visitors', async ({ page }) => {
+  await page.goto('/blog')
+  await expect(page.getByRole('button', { name: /Proposer un article/i })).toHaveCount(0)
+})

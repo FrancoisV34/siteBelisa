@@ -16,7 +16,7 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
     try {
       const fd = new FormData()
       fd.append('file', file)
-      const r = await fetch('/api/admin/upload', {
+      const r = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',
         body: fd,

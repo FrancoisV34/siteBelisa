@@ -1707,3 +1707,165 @@ img {
 @media (max-width: 480px) {
   .profile-meta { grid-template-columns: 1fr; }
 }
+
+/* === Modal === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh 1rem;
+  z-index: 1000;
+  overflow-y: auto;
+  animation: modal-fade-in 0.18s ease-out;
+}
+
+.modal-dialog {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  overflow: hidden;
+  animation: modal-pop-in 0.22s ease-out;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-family: Georgia, serif;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6e6e73;
+  padding: 0.25rem;
+  border-radius: 6px;
+}
+.modal-close:hover { background: #f3f3f3; color: #1d1d1f; }
+
+.modal-body {
+  padding: 1.25rem 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modal-hint {
+  font-size: 0.875rem;
+  color: #6e6e73;
+  background: #f9f7f1;
+  border-left: 3px solid #c0a062;
+  padding: 0.625rem 0.875rem;
+  margin: 0 0 1rem;
+  border-radius: 4px;
+}
+
+.modal-loading {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #6e6e73;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes modal-pop-in {
+  from { opacity: 0; transform: translateY(-12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* === Blog: submit button === */
+.blog-submit-bar {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0 2.5rem;
+}
+
+/* === Profile: my submissions === */
+.profile-submissions {
+  margin-top: 2.5rem;
+}
+.profile-submissions h2 {
+  margin-bottom: 1rem;
+  font-family: Georgia, serif;
+  font-size: 1.4rem;
+}
+.submissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.submission-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #faf9f6;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+.submission-title { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.submission-status {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.submission-status.is-pending  { background: #fef3c7; color: #92400e; }
+.submission-status.is-published{ background: #dcfce7; color: #166534; }
+.submission-status.is-draft    { background: #e5e7eb; color: #374151; }
+.submission-actions { display: flex; gap: 0.4rem; }
+.submission-actions .btn { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+@media (max-width: 600px) {
+  .submission-row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: "title status" "actions actions";
+  }
+  .submission-title { grid-area: title; }
+  .submission-status { grid-area: status; justify-self: end; }
+  .submission-actions { grid-area: actions; justify-self: stretch; }
+}
+
+/* === Moderation: pending posts === */
+.moderation-pending-posts .moderation-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  background: #faf9f6;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+.moderation-pending-posts .moderation-item-title { font-weight: 500; }
+.moderation-pending-posts .moderation-item-meta { color: #6e6e73; font-size: 0.85rem; }
+.moderation-pending-posts .moderation-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }

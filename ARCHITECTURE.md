@@ -74,7 +74,7 @@ Voir `README.md` §Structure du projet. Points clefs :
 |---|---|---|
 | `users` | Comptes utilisateurs | `id`, `email` (unique), `password_hash` (bcrypt), `display_name`, `role` (`user`/`admin`), `status` (`active`/`banned`), `created_at` |
 | `sessions` | Sessions actives | `token` (PK, 32 bytes hex), `user_id`, `expires_at`, `created_at` |
-| `posts` | Articles de blog | `id`, `author_id`, `slug` (unique), `title`, `content_html`, `excerpt`, `cover_image`, `status` (`draft`/`published`), `published_at`, `created_at`, `updated_at` |
+| `posts` | Articles de blog | `id`, `author_id`, `slug` (unique), `title`, `content_html`, `excerpt`, `cover_image`, `status` (`draft`/`pending`/`published`), `published_at`, `created_at`, `updated_at` |
 | `comments` | Commentaires posts | `id`, `post_id` (FK CASCADE), `user_id`, `content`, `status` (`visible`/`hidden`), `created_at` |
 | `likes` | J'aime | PK composite (`user_id`, `post_id`), `created_at` |
 | `guestbook` | Livre d'or | `id`, `user_id`, `message`, `status`, `created_at` |
@@ -95,6 +95,32 @@ Voir `README.md` §Structure du projet. Points clefs :
 - Tous les timestamps sont des `INTEGER` en secondes Unix (UTC).
 - Pas de `updated_at` automatique : les updates écrivent explicitement la valeur.
 - Soft-delete via `status = 'hidden'` / `'draft'` — pas de hard-delete sauf sur user et sessions.
+
+## 4.bis Flow de modération des articles
+
+Tout article transite par la même table `posts`. Le statut détermine la visibilité :
+
+```
+[Utilisateur connecté]                          [Admin]
+  POST /api/posts/submit
+       │  status='pending'
+       ▼
+  ┌─ posts (status='pending') ─┐
+  │ visible : auteur seul       │ ───── PATCH /api/admin/posts/:id
+  │ + admin via /admin/         │       { status: 'published' }
+  └─────────────────────────────┘                │
+       │                                          ▼
+       │   PATCH /api/posts/mine/:id     ┌─ posts (status='published') ─┐
+       │   (édit while pending)          │ visible publiquement (/blog)  │
+       │                                 └────────────────────────────────┘
+       │   DELETE /api/posts/mine/:id            ▲
+       │   (withdraw while pending)              │ DELETE /api/admin/posts/:id
+       ▼                                         │ (refus admin = suppression)
+  [proposition retirée]                          │
+                                          [proposition refusée]
+```
+
+Pas de table dédiée, pas de migration de données : la "validation" admin = simple `UPDATE status` sur la même ligne.
 
 ## 5. Authentification & autorisation
 
@@ -158,6 +184,12 @@ if (auth.error) return auth.error
 | POST | `/api/posts/[id]/like` | Toggle like |
 | POST | `/api/posts/[id]/comments` | Poster un commentaire |
 | POST | `/api/guestbook` | Signer le livre d'or |
+| POST | `/api/posts/submit` | Proposer un article (status `pending`, max 5 en attente) |
+| GET | `/api/posts/mine` | Liste de mes propositions (tous statuts) |
+| GET | `/api/posts/mine/[id]` | Détail d'une proposition (ownership requise) |
+| PATCH | `/api/posts/mine/[id]` | Édition d'une proposition (uniquement si `pending`) |
+| DELETE | `/api/posts/mine/[id]` | Retrait d'une proposition (uniquement si `pending`) |
+| POST | `/api/upload` | Upload image R2 (5 Mo max, jpg/png/webp/gif) |
 
 ### Admin (rôle `admin` requis — protégés par `adminOnly()`)
 
@@ -165,8 +197,7 @@ Préfixe `/api/admin/`. Tous protégés par `adminOnly()` qui combine `requireUs
 
 | Méthode | Route | Description |
 |---|---|---|
-| POST | `/api/admin/upload` | Upload image vers R2 (5 Mo max, jpg/png/webp/gif) |
-| GET POST | `/api/admin/posts` | Liste / créer post |
+| GET POST | `/api/admin/posts?status=...` | Liste (filtrable: draft/pending/published) / créer post |
 | PATCH DELETE | `/api/admin/posts/[id]` | Modifier / supprimer post |
 | GET POST | `/api/admin/oeuvres` | Liste / créer œuvre |
 | PATCH DELETE | `/api/admin/oeuvres/[id]` | Modifier / supprimer œuvre |
@@ -260,6 +291,9 @@ Voir le plan d'audit (`/Users/fv/.claude/plans/`) pour la roadmap de durcissemen
 | Auth client | `src/contexts/AuthContext.jsx` |
 | Guards client | `src/components/RequireAuth.jsx`, `src/components/RequireRole.jsx` |
 | Routing | `src/App.jsx` |
-| Schema DB | `migrations/0001_init.sql`, `migrations/0002_content.sql` |
+| Schema DB | `migrations/0001_init.sql`, `migrations/0002_content.sql`, `migrations/0003_login_lockout.sql` |
+| Soumission user | `functions/api/posts/submit.js`, `functions/api/posts/mine/*.js`, `src/components/SubmitArticleModal.jsx` |
+| Modération admin | `src/pages/admin/Moderation.jsx` (section pending), filtre `?status=pending` dans `functions/api/admin/posts/index.js` |
+| Upload R2 | `functions/api/upload.js` (anciennement `admin/upload.js`) |
 | Config CF | `wrangler.toml` |
 | Build | `vite.config.js`, `package.json` |
