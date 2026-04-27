@@ -39,7 +39,7 @@ SPA React 19 (Vite) servie par Cloudflare Pages, avec un backend en Pages Functi
 | Tâche | Commande |
 |---|---|
 | Dev frontend seul | `npm run dev` |
-| Dev complet (Functions + D1 + R2) | `npm run build && npx wrangler pages dev dist --d1=DB=site-belisa --r2=MEDIA=belisa-assets` |
+| Dev complet (Functions + D1 + R2) | `npm run build && npx wrangler pages dev dist` |
 | Appliquer migrations en local | `npx wrangler d1 migrations apply site-belisa --local` |
 | Appliquer migrations en prod | `npx wrangler d1 migrations apply site-belisa --remote` |
 | Console SQL local | `npx wrangler d1 execute site-belisa --local --command "SELECT * FROM users"` |
@@ -50,6 +50,7 @@ SPA React 19 (Vite) servie par Cloudflare Pages, avec un backend en Pages Functi
 ## Pièges connus
 
 - **`/api/*` retourne 500 en local** : lance via `wrangler pages dev`, pas `vite`. `vite` ne sert pas les Functions.
+- **`/api/*` retourne 500 "no such table"** avec `wrangler pages dev` : tu as passé les flags `--d1=DB=...` ou `--r2=MEDIA=...`. Ces flags forcent un *store local séparé* de celui utilisé par `wrangler d1 migrations apply --local`. **Ne les utilise pas** — laisse `wrangler.toml` driver les bindings (`npx wrangler pages dev dist` tout court).
 - **`/api/*` retourne 500 en prod après déploiement** : binding D1 ou R2 oublié → voir `DEPLOY.md` §2. Refaire un "Retry deployment" après avoir lié.
 - **Login échoue après une nouvelle migration** : la migration n'a pas été appliquée en remote. Lance `npx wrangler d1 migrations apply site-belisa --remote`.
 - **Cookie de session perdu en local** : `Secure` est forcé sur le cookie (`functions/_lib/auth.js`) → en local ça marche quand même via `localhost` mais pas via une IP LAN.

@@ -15,7 +15,7 @@ export default defineConfig({
   ],
   // Default: spin up the Vite dev server on a dedicated port for tests.
   // For full-stack E2E (Functions + D1 + R2), set E2E_BASE_URL=http://localhost:8788
-  // and start `npx wrangler pages dev dist --d1=DB=site-belisa --r2=MEDIA=belisa-assets` separately.
+  // and start `npx wrangler pages dev dist` separately (bindings come from wrangler.toml).
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {

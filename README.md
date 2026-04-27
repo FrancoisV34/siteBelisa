@@ -45,10 +45,12 @@ Sert le frontend sur `http://localhost:5173`. Les routes `/api/*` ne sont pas di
 
 ```bash
 npm run build
-npx wrangler pages dev dist --d1=DB=site-belisa --r2=MEDIA=belisa-assets
+npx wrangler pages dev dist
 ```
 
-Sert le site complet sur `http://localhost:8788` avec une D1 et un R2 simulés en local. C'est le mode à utiliser pour tester auth, admin, upload, etc.
+Sert le site complet sur `http://localhost:8788` avec une D1 et un R2 simulés en local. C'est le mode à utiliser pour tester auth, admin, upload, etc. Les bindings `DB` et `MEDIA` sont lus automatiquement depuis `wrangler.toml`.
+
+⚠️ **Ne pas passer les flags `--d1=DB=...` ni `--r2=MEDIA=...`** : ils créent des stores locaux *séparés* de ceux utilisés par `wrangler d1 migrations apply --local` (la base apparaît vide alors qu'elle est peuplée ailleurs).
 
 Avant le premier lancement, appliquer les migrations en local :
 
