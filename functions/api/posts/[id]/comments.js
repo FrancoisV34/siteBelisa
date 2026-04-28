@@ -10,12 +10,12 @@ export async function onRequestGet({ env, params }) {
     const { results } = await env.DB.prepare(
       `SELECT c.id, c.content, c.created_at, u.id AS user_id, u.display_name
        FROM comments c JOIN users u ON u.id = c.user_id
-       WHERE c.post_id = ? AND c.status = 'visible'
+       WHERE c.post_id = ? AND c.status = 'visible' AND u.status = 'active'
        ORDER BY c.created_at ASC`
     ).bind(postId).all()
     return json({ comments: results })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }
 

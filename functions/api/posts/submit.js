@@ -1,7 +1,7 @@
 import { json, badRequest, serverError } from '../../_lib/json.js'
 import { requireUser } from '../../_lib/auth.js'
 import { slugify, uniqueSlug } from '../../_lib/slug.js'
-import { sanitizeRichText, sanitizePlainText } from '../../_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../_lib/sanitize.js'
 
 const MAX_PENDING_PER_USER = 5
 
@@ -16,7 +16,11 @@ export async function onRequestPost({ request, env }) {
     const title = sanitizePlainText(body.title).trim()
     const contentHtml = sanitizeRichText(String(body.content_html || '').trim())
     const excerpt = body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null
-    const coverImage = body.cover_image ? String(body.cover_image).trim().slice(0, 500) : null
+    let coverImage = null
+    if (body.cover_image) {
+      coverImage = sanitizeCoverImage(body.cover_image)
+      if (!coverImage) return badRequest('Cover image must be an https:// URL or /r2/ path')
+    }
 
     if (title.length < 1 || title.length > 200) return badRequest('Title must be 1-200 chars')
     if (contentHtml.length < 1) return badRequest('Content required')
@@ -43,6 +47,6 @@ export async function onRequestPost({ request, env }) {
       post: { id: result.meta.last_row_id, slug, title, status: 'pending' },
     })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

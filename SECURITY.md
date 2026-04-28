@@ -23,6 +23,9 @@ Profil utilisateur : artiste solo, faible volume, pas de PII sensible (pas de pa
   - 6e → 30 min
   - 7e+ → 60 min (cap)
   - Reset sur succès
+- **Anti-énumération** :
+  - Login : tous les chemins (email inconnu, banni, mauvais password) retournent **401 "Invalid credentials"** uniforme avec un bcrypt compare exécuté systématiquement (timing equalization, dummy hash sur user inconnu)
+  - Register : `hashPassword` exécuté avant le check d'existence pour égaliser le timing collision/succès
 - Reset password : **non implémenté** (limitation connue — à ajouter si besoin)
 
 ### Autorisation
@@ -54,6 +57,8 @@ Profil utilisateur : artiste solo, faible volume, pas de PII sensible (pas de pa
 ### Upload R2
 - Endpoint `/api/upload` ouvert à tout utilisateur authentifié (auparavant admin-only)
 - Validation MIME : `image/jpeg|png|webp|gif` uniquement
+- **Validation magic bytes** : les 12 premiers octets sont vérifiés contre la signature attendue (FF D8 FF pour JPEG, 89 50 4E 47 pour PNG, etc.). Reject si mismatch entre type déclaré et signature détectée
+- Le `contentType` stocké dans R2 est **dérivé de la signature**, jamais du client
 - Validation taille : 5 Mo max
 - Clés UUID — pas de path traversal ni collision
 - Servi en `Cache-Control: public, max-age=31536000, immutable`
@@ -62,9 +67,20 @@ Profil utilisateur : artiste solo, faible volume, pas de PII sensible (pas de pa
 ### Soumission d'articles utilisateur
 - Endpoint `POST /api/posts/submit` : auth requise, status forcé à `pending`
 - **Limite hard** : max 5 propositions `pending` simultanées par utilisateur (refus 429)
-- Sanitization : `sanitizePlainText` (titre, extrait) + `sanitizeRichText` (content_html)
+- Sanitization : `sanitizePlainText` (titre, extrait) + `sanitizeRichText` (content_html) + `sanitizeCoverImage` (cover : https:// ou /r2/ uniquement, refus de http/data/javascript/protocol-relative)
 - Endpoints `/api/posts/mine/[id]` (PATCH/DELETE) : ownership stricte, refus 409 si statut autre que `pending`
 - Validation admin = simple changement de statut via `/api/admin/posts/[id]` PATCH (code existant)
+
+### Bannissement d'un utilisateur
+- Au moment du ban (`PATCH /api/admin/users/[id]` avec `status='banned'`) :
+  1. Sessions actives du user supprimées (`deleteSessionsForUser`)
+  2. Cascade : `posts` `published → draft`, `comments` `visible → hidden`, `guestbook` `visible → hidden` pour cet auteur
+- **Defense au read** : tous les endpoints publics (posts list, post détail, comments, guestbook) joignent `users` avec `WHERE u.status='active'` — le contenu d'un user banni n'apparaît jamais publiquement même si la cascade rate
+- Un unban (`status='active'`) ne restaure pas automatiquement le contenu — l'admin doit republier explicitement
+
+### Réponses d'erreur
+- `serverError()` (`functions/_lib/json.js`) ne renvoie jamais le détail d'exception au client (toujours `{ error: 'Internal error' }`). L'erreur réelle est loggée côté serveur (`console.error`, visible via `wrangler tail` + Cloudflare Logs)
+- Pas de fuite de schéma D1, contraintes UNIQUE, noms de colonnes, ou erreurs R2 par cette voie
 
 ### Logging / monitoring
 - **À améliorer** : aucun log structuré actuellement sur événements sensibles (login fail, admin action, upload). Cloudflare donne les access logs via dashboard mais sans détails métier.

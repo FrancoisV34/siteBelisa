@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { json, badRequest, notFound, serverError } from '../../functions/_lib/json.js'
 
 describe('json helpers', () => {
@@ -29,9 +29,22 @@ describe('json helpers', () => {
     expect(await res.json()).toEqual({ error: 'Not found' })
   })
 
-  it('serverError() defaults to "Internal error"', async () => {
+  it('serverError() always returns generic "Internal error", never leaks args', async () => {
     const res = serverError()
     expect(res.status).toBe(500)
     expect(await res.json()).toEqual({ error: 'Internal error' })
+  })
+
+  it('serverError() ignores its argument in the response body', async () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const leaky = 'D1_ERROR: UNIQUE constraint failed: users.email'
+    const res = serverError(leaky)
+    expect(res.status).toBe(500)
+    const body = await res.json()
+    expect(body).toEqual({ error: 'Internal error' })
+    expect(JSON.stringify(body)).not.toContain('D1_ERROR')
+    expect(JSON.stringify(body)).not.toContain('users.email')
+    expect(consoleSpy).toHaveBeenCalled()
+    consoleSpy.mockRestore()
   })
 })

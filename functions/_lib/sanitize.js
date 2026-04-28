@@ -98,3 +98,22 @@ export function sanitizePlainText(input) {
     stripIgnoreTagBody: ['script', 'style'],
   })
 }
+
+/**
+ * Validate a cover image URL: stricter than `isSafeImageSrc` because the
+ * value is rendered into <img src> seen by the moderator (and on /blog).
+ * Allowed: https:// or same-origin /r2/ paths only.
+ * Rejected: http://, javascript:, data:, vbscript:, protocol-relative //, etc.
+ *
+ * Returns the trimmed URL if valid, or `null` if invalid/empty.
+ * Caller must convert null to a 400 (not silently store).
+ */
+export function sanitizeCoverImage(input) {
+  if (input == null) return null
+  const trimmed = String(input).trim().slice(0, 500)
+  if (!trimmed) return null
+  const lower = trimmed.toLowerCase()
+  if (lower.startsWith('https://')) return trimmed
+  if (trimmed.startsWith('/r2/')) return trimmed
+  return null
+}

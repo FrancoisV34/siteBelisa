@@ -19,12 +19,15 @@ export async function onRequestPost({ request, env }) {
       return badRequest('Display name must be 2-60 characters')
     }
 
+    // Equalize timing: always hash the password before checking existence so a
+    // collision response and a success response have the same latency profile.
+    const hash = await hashPassword(password)
+
     const existing = await env.DB.prepare(
       `SELECT id FROM users WHERE email = ?`
     ).bind(email).first()
     if (existing) return badRequest('Email already registered')
 
-    const hash = await hashPassword(password)
     const now = Math.floor(Date.now() / 1000)
     const result = await env.DB.prepare(
       `INSERT INTO users (email, password_hash, display_name, role, status, created_at)

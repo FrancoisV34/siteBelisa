@@ -7,12 +7,12 @@ export async function onRequestGet({ env, params }) {
               p.published_at, u.display_name AS author_name
        FROM posts p
        JOIN users u ON u.id = p.author_id
-       WHERE p.slug = ? AND p.status = 'published'`
+       WHERE p.slug = ? AND p.status = 'published' AND u.status = 'active'`
     ).bind(params.slug).first()
 
     if (!post) return notFound('Post not found')
     return json({ post })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

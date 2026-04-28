@@ -31,10 +31,20 @@ export async function onRequestPatch({ request, env, params }) {
     await env.DB.prepare(`UPDATE users SET role = ?, status = ? WHERE id = ?`)
       .bind(role, status, id).run()
 
-    if (status === 'banned') await deleteSessionsForUser(env, id)
+    // On ban, kill the user's sessions and cascade-hide their content.
+    // Unbanning later does NOT auto-restore content — admin must republish
+    // explicitly. This matches the "ban = censorship" expectation.
+    if (status === 'banned' && target.status !== 'banned') {
+      await deleteSessionsForUser(env, id)
+      await env.DB.batch([
+        env.DB.prepare(`UPDATE posts SET status='draft' WHERE author_id=? AND status='published'`).bind(id),
+        env.DB.prepare(`UPDATE comments SET status='hidden' WHERE user_id=? AND status='visible'`).bind(id),
+        env.DB.prepare(`UPDATE guestbook SET status='hidden' WHERE user_id=? AND status='visible'`).bind(id),
+      ])
+    }
 
     return json({ user: { id, role, status } })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

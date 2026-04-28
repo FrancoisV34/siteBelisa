@@ -10,16 +10,17 @@ export async function onRequestPost({ request, env }) {
     const form = await request.formData().catch(() => null)
     if (!form) return badRequest('Invalid form data')
     const file = form.get('file')
-    const v = validateImage(file)
+    const v = await validateImage(file)
     if (v.error) return badRequest(v.error)
 
     const key = makeKey(v.ext)
+    // Use the SERVER-DERIVED content type, not the client-supplied one.
     await env.MEDIA.put(key, file.stream(), {
-      httpMetadata: { contentType: file.type },
+      httpMetadata: { contentType: v.contentType },
     })
 
     return json({ url: publicUrl(key), key })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

@@ -1,6 +1,15 @@
 import { json, badRequest, serverError } from '../../_lib/json.js'
-import { verifyPassword, createSession, sessionCookie } from '../../_lib/auth.js'
+import { verifyPassword, createSession, sessionCookie, hashPassword } from '../../_lib/auth.js'
 import { isLocked, lockoutSecondsRemaining, recordFailedLogin, resetLoginFails } from '../../_lib/lockout.js'
+
+// Cache a dummy bcrypt hash to equalize timing on the unknown-email path.
+// Lazily initialized once per isolate; subsequent unknown-email logins reuse it.
+// The plaintext is irrelevant — this hash is never matched against a real user.
+let _dummyHash = null
+async function dummyHash() {
+  if (!_dummyHash) _dummyHash = await hashPassword('dummy-equalize-timing')
+  return _dummyHash
+}
 
 export async function onRequestPost({ request, env }) {
   try {
@@ -15,8 +24,21 @@ export async function onRequestPost({ request, env }) {
       `SELECT id, email, password_hash, display_name, role, status, login_fails, locked_until
        FROM users WHERE email = ?`
     ).bind(email).first()
-    if (!user) return json({ error: 'Invalid credentials' }, { status: 401 })
-    if (user.status === 'banned') return json({ error: 'Account suspended' }, { status: 403 })
+
+    // Equalize timing: always run one bcrypt compare regardless of whether the
+    // email exists. Avoids leaking account existence via response latency.
+    if (!user) {
+      await verifyPassword(password, await dummyHash())
+      return json({ error: 'Invalid credentials' }, { status: 401 })
+    }
+
+    // Banned accounts return the same generic error as wrong credentials.
+    // Avoids leaking "this email is registered (and banned)". Sessions are
+    // already deleted on ban so they cannot log in anyway.
+    if (user.status === 'banned') {
+      await verifyPassword(password, user.password_hash)
+      return json({ error: 'Invalid credentials' }, { status: 401 })
+    }
 
     const now = Math.floor(Date.now() / 1000)
     if (isLocked(user, now)) {
@@ -53,6 +75,6 @@ export async function onRequestPost({ request, env }) {
       { headers: { 'set-cookie': sessionCookie(token, maxAge) } }
     )
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

@@ -11,13 +11,13 @@ export async function onRequestGet({ env, request }) {
               u.display_name AS author_name
        FROM posts p
        JOIN users u ON u.id = p.author_id
-       WHERE p.status = 'published'
+       WHERE p.status = 'published' AND u.status = 'active'
        ORDER BY p.published_at DESC
        LIMIT ? OFFSET ?`
     ).bind(limit, offset).all()
 
     return json({ posts: results })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }

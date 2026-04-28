@@ -1,7 +1,7 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { requireUser, requireRole } from '../../../_lib/auth.js'
 import { slugify, uniqueSlug } from '../../../_lib/slug.js'
-import { sanitizeRichText, sanitizePlainText } from '../../../_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../../_lib/sanitize.js'
 
 async function loadAndCheck(env, params, user) {
   const id = parseInt(params.id, 10)
@@ -50,9 +50,15 @@ export async function onRequestPatch({ request, env, params }) {
     const excerpt = body.excerpt !== undefined
       ? (body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null)
       : post.excerpt
-    const coverImage = body.cover_image !== undefined
-      ? (body.cover_image ? String(body.cover_image).trim().slice(0, 500) : null)
-      : post.cover_image
+    let coverImage = post.cover_image
+    if (body.cover_image !== undefined) {
+      if (body.cover_image) {
+        coverImage = sanitizeCoverImage(body.cover_image)
+        if (!coverImage) return badRequest('Cover image must be an https:// URL or /r2/ path')
+      } else {
+        coverImage = null
+      }
+    }
     const newStatus = body.status === 'published' ? 'published'
                     : body.status === 'draft' ? 'draft'
                     : post.status

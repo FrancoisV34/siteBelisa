@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeRichText, sanitizePlainText } from '../../functions/_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../functions/_lib/sanitize.js'
 
 describe('sanitizeRichText', () => {
   it('keeps allowed TipTap tags untouched', () => {
@@ -124,5 +124,52 @@ describe('sanitizePlainText', () => {
     const out = sanitizePlainText('<img src=x onerror=alert(1)>')
     expect(out).not.toContain('onerror')
     expect(out).not.toContain('alert')
+  })
+})
+
+describe('sanitizeCoverImage', () => {
+  it('accepts https:// URLs', () => {
+    expect(sanitizeCoverImage('https://example.com/x.jpg')).toBe('https://example.com/x.jpg')
+  })
+
+  it('accepts same-origin /r2/ paths', () => {
+    expect(sanitizeCoverImage('/r2/images/abc.jpg')).toBe('/r2/images/abc.jpg')
+  })
+
+  it('rejects http:// (mixed-content + tracking pixel risk)', () => {
+    expect(sanitizeCoverImage('http://example.com/x.jpg')).toBeNull()
+  })
+
+  it('rejects javascript: URLs', () => {
+    expect(sanitizeCoverImage('javascript:alert(1)')).toBeNull()
+    expect(sanitizeCoverImage('JAVASCRIPT:alert(1)')).toBeNull()
+  })
+
+  it('rejects data: URLs even data:image/...', () => {
+    expect(sanitizeCoverImage('data:image/png;base64,iVBOR...')).toBeNull()
+    expect(sanitizeCoverImage('data:text/html,<script>x</script>')).toBeNull()
+  })
+
+  it('rejects protocol-relative URLs', () => {
+    expect(sanitizeCoverImage('//evil.tld/x.jpg')).toBeNull()
+  })
+
+  it('rejects other relative paths', () => {
+    expect(sanitizeCoverImage('/foo/bar.jpg')).toBeNull()
+    expect(sanitizeCoverImage('../etc/passwd')).toBeNull()
+    expect(sanitizeCoverImage('foo.jpg')).toBeNull()
+  })
+
+  it('rejects empty / null / non-string', () => {
+    expect(sanitizeCoverImage(null)).toBeNull()
+    expect(sanitizeCoverImage(undefined)).toBeNull()
+    expect(sanitizeCoverImage('')).toBeNull()
+    expect(sanitizeCoverImage('   ')).toBeNull()
+  })
+
+  it('caps length at 500 chars', () => {
+    const long = 'https://example.com/' + 'a'.repeat(600)
+    const out = sanitizeCoverImage(long)
+    expect(out?.length).toBe(500)
   })
 })

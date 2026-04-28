@@ -9,12 +9,12 @@ export async function onRequestGet({ env, request }) {
     const { results } = await env.DB.prepare(
       `SELECT g.id, g.message, g.created_at, u.display_name
        FROM guestbook g JOIN users u ON u.id = g.user_id
-       WHERE g.status = 'visible'
+       WHERE g.status = 'visible' AND u.status = 'active'
        ORDER BY g.created_at DESC LIMIT ?`
     ).bind(limit).all()
     return json({ entries: results })
   } catch (e) {
-    return serverError(e.message)
+    return serverError(e)
   }
 }
 
