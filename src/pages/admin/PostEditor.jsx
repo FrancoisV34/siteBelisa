@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import RichEditor from '../../components/RichEditor.jsx'
+import ImageUpload from '../../components/ImageUpload.jsx'
 
 export default function PostEditor() {
   const { id } = useParams()
@@ -79,10 +80,7 @@ export default function PostEditor() {
           <span>Titre</span>
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} required />
         </label>
-        <label>
-          <span>Image de couverture (URL)</span>
-          <input type="url" value={coverImage} onChange={(e) => setCoverImage(e.target.value)} placeholder="https://…" />
-        </label>
+        <ImageUpload value={coverImage} onChange={setCoverImage} label="Image de couverture" />
         <label>
           <span>Extrait (max 300 caractères)</span>
           <textarea value={excerpt} onChange={(e) => setExcerpt(e.target.value)} maxLength={300} rows={2} />
