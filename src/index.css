@@ -1869,3 +1869,90 @@ img {
 .moderation-pending-posts .moderation-item-title { font-weight: 500; }
 .moderation-pending-posts .moderation-item-meta { color: #6e6e73; font-size: 0.85rem; }
 .moderation-pending-posts .moderation-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+/* ===== Legal pages ===== */
+.legal-page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+  line-height: 1.65;
+}
+.legal-page h1 {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+}
+.legal-page h2 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  margin: 2rem 0 0.75rem;
+}
+.legal-page section { margin-bottom: 1.5rem; }
+.legal-page ul { padding-left: 1.5rem; }
+.legal-page li { margin-bottom: 0.4rem; }
+.legal-page code {
+  background: #f4f3ee;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+
+/* ===== Footer legal links ===== */
+.footer-legal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+}
+.footer-legal a {
+  color: #9ca3af;
+  text-decoration: none;
+}
+.footer-legal a:hover { color: #ffffff; }
+.footer-legal span { color: #4b5563; }
+
+/* ===== Profile RGPD section ===== */
+.profile-data {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+.profile-data h2 {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+}
+.profile-data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.profile-delete-confirm {
+  width: 100%;
+  padding: 1rem;
+  background: #fff5f5;
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+}
+.profile-delete-confirm p { margin-bottom: 0.75rem; }
+.profile-delete-confirm input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+.profile-delete-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.btn-danger {
+  background-color: #b00020;
+  color: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+.btn-danger:hover { background-color: #8a0019; box-shadow: var(--shadow-md); }
+.btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+

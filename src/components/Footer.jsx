@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 const fadeUp = {
@@ -28,7 +29,7 @@ function Footer() {
           custom={0}
         >
           <h3>Belisa Wagner</h3>
-          <p>Artiste &mdash; Createur</p>
+          <p>Romanci&egrave;re</p>
         </motion.div>
         <motion.div
           className="footer-section"
@@ -39,8 +40,9 @@ function Footer() {
           custom={1}
         >
           <h3>Contact</h3>
-          <p>email@exemple.com</p>
-          <p>+33 1 23 45 67 89</p>
+          <p>
+            <a href="mailto:vittecoqisabelle@gmail.com">vittecoqisabelle@gmail.com</a>
+          </p>
         </motion.div>
         <motion.div
           className="footer-section"
@@ -52,14 +54,24 @@ function Footer() {
         >
           <h3>Suivez-moi</h3>
           <div className="footer-socials">
-            <a href="#" aria-label="Instagram">Instagram</a>
-            <a href="#" aria-label="LinkedIn">LinkedIn</a>
-            <a href="#" aria-label="Twitter">Twitter</a>
+            <a
+              href="https://www.facebook.com/isavitt/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+            >
+              Facebook
+            </a>
           </div>
         </motion.div>
       </div>
       <div className="footer-bottom">
-        <p>&copy; {currentYear} Belisa Wagner. Tous droits reserves.</p>
+        <p>&copy; {currentYear} Belisa Wagner. Tous droits r&eacute;serv&eacute;s.</p>
+        <nav className="footer-legal" aria-label="Liens l&eacute;gaux">
+          <Link to="/mentions-legales">Mentions l&eacute;gales</Link>
+          <span aria-hidden="true">·</span>
+          <Link to="/confidentialite">Politique de confidentialit&eacute;</Link>
+        </nav>
       </div>
     </footer>
   )

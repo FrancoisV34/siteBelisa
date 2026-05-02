@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import Avatar from '../components/Avatar.jsx'
@@ -21,7 +21,8 @@ function formatDate(ts) {
 }
 
 export default function Profile() {
-  const { user, updateProfile } = useAuth()
+  const { user, updateProfile, deleteAccount } = useAuth()
+  const navigate = useNavigate()
   const [displayName, setDisplayName] = useState(user?.display_name || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -30,6 +31,50 @@ export default function Profile() {
   const [submissions, setSubmissions] = useState(null)
   const [submissionsError, setSubmissionsError] = useState(null)
   const [editingId, setEditingId] = useState(null)
+
+  const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleteText, setDeleteText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
+
+  const exportData = async () => {
+    setExportError(null)
+    setExporting(true)
+    try {
+      const r = await fetch('/api/auth/me/export', { credentials: 'include' })
+      if (!r.ok) {
+        const data = await r.json().catch(() => ({}))
+        throw new Error(data.error || 'Export impossible')
+      }
+      const blob = await r.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `belisa-data-export-${user.id}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      setExportError(e.message)
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const performDelete = async () => {
+    setDeleteError(null)
+    setDeleting(true)
+    try {
+      await deleteAccount()
+      navigate('/', { replace: true })
+    } catch (e) {
+      setDeleteError(e.message)
+      setDeleting(false)
+    }
+  }
 
   const reloadSubmissions = () => {
     fetch('/api/posts/mine', { credentials: 'include' })
@@ -157,6 +202,57 @@ export default function Profile() {
               ))}
             </div>
           )}
+        </section>
+
+        <section className="profile-data">
+          <h2>Mes données personnelles</h2>
+          <p style={{ color: '#6e6e73', fontSize: '0.9rem' }}>
+            Conformément au RGPD, vous pouvez télécharger une copie complète de vos données,
+            ou supprimer votre compte. Vos contributions publiques (commentaires, livre d'or,
+            articles publiés) seront anonymisées.
+          </p>
+          {exportError && <p className="auth-error">{exportError}</p>}
+          {deleteError && <p className="auth-error">{deleteError}</p>}
+          <div className="profile-data-actions">
+            <button className="btn btn-secondary" onClick={exportData} disabled={exporting}>
+              {exporting ? 'Préparation…' : 'Exporter mes données (JSON)'}
+            </button>
+            {!confirmDelete ? (
+              <button className="btn btn-danger" onClick={() => setConfirmDelete(true)}>
+                Supprimer mon compte
+              </button>
+            ) : (
+              <div className="profile-delete-confirm">
+                <p>
+                  Cette action est <strong>définitive</strong>. Pour confirmer, tapez{' '}
+                  <code>SUPPRIMER</code> ci-dessous.
+                </p>
+                <input
+                  type="text"
+                  value={deleteText}
+                  onChange={(e) => setDeleteText(e.target.value)}
+                  placeholder="SUPPRIMER"
+                  autoFocus
+                />
+                <div className="profile-delete-actions">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => { setConfirmDelete(false); setDeleteText(''); setDeleteError(null) }}
+                    disabled={deleting}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    className="btn btn-danger"
+                    onClick={performDelete}
+                    disabled={deleting || deleteText !== 'SUPPRIMER'}
+                  >
+                    {deleting ? 'Suppression…' : 'Supprimer définitivement'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
       </motion.div>
 

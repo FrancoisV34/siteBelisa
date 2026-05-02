@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import Navbar from './components/Navbar.jsx'
 import Footer from './components/Footer.jsx'
+import ScrollToTop from './components/ScrollToTop.jsx'
 import Home from './pages/Home.jsx'
 import Oeuvres from './pages/Oeuvres.jsx'
 import Blog from './pages/Blog.jsx'
@@ -11,6 +12,8 @@ import Guestbook from './pages/Guestbook.jsx'
 import Login from './pages/Login.jsx'
 import Register from './pages/Register.jsx'
 import Profile from './pages/Profile.jsx'
+import MentionsLegales from './pages/MentionsLegales.jsx'
+import Confidentialite from './pages/Confidentialite.jsx'
 import RequireRole from './components/RequireRole.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
 import NotFound from './pages/NotFound.jsx'
@@ -40,6 +43,7 @@ function App() {
 
   return (
     <div className="app">
+      <ScrollToTop />
       <Navbar />
       <main className="main-content">
         <AnimatePresence mode="wait">
@@ -59,6 +63,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/profil" element={<RequireAuth><Profile /></RequireAuth>} />
+              <Route path="/mentions-legales" element={<MentionsLegales />} />
+              <Route path="/confidentialite" element={<Confidentialite />} />
               <Route path="/admin" element={
                 <RequireRole roles={['admin']}>
                   <Suspense fallback={<AdminFallback />}><AdminLayout /></Suspense>

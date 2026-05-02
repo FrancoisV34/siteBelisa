@@ -51,6 +51,13 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const deleteAccount = async () => {
+    const r = await fetch('/api/auth/me', { method: 'DELETE', credentials: 'include' })
+    const data = await r.json().catch(() => ({}))
+    if (!r.ok) throw new Error(data.error || 'Suppression impossible')
+    setUser(null)
+  }
+
   const updateProfile = async (patch) => {
     const r = await fetch('/api/auth/me', {
       method: 'PATCH',
@@ -65,7 +72,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refresh, updateProfile, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   )
