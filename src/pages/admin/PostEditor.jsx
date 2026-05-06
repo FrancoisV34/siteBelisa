@@ -90,6 +90,15 @@ export default function PostEditor() {
           <RichEditor value={contentHtml} onChange={setContentHtml} />
         </label>
       </div>
+
+      <div className="admin-page-actions" style={{ marginTop: '2rem', justifyContent: 'flex-end' }}>
+        <button className="btn btn-secondary" onClick={() => save('draft')} disabled={saving}>
+          Enregistrer brouillon
+        </button>
+        <button className="btn btn-primary" onClick={() => save('published')} disabled={saving || !title || !contentHtml}>
+          {status === 'published' ? 'Mettre à jour' : 'Publier'}
+        </button>
+      </div>
     </div>
   )
 }

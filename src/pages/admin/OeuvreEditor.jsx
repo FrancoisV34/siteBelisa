@@ -119,6 +119,14 @@ export default function OeuvreEditor() {
           </select>
         </label>
       </div>
+
+      <div className="admin-page-actions" style={{ marginTop: '2rem', justifyContent: 'flex-end' }}>
+        {!isNew && <button className="btn btn-secondary" onClick={remove}>Supprimer</button>}
+        <button className="btn btn-secondary" onClick={() => navigate('/admin/oeuvres')}>Annuler</button>
+        <button className="btn btn-primary" onClick={save} disabled={saving || !form.title}>
+          {saving ? 'Enregistrement…' : 'Enregistrer'}
+        </button>
+      </div>
     </div>
   )
 }
