@@ -382,6 +382,17 @@ img {
   transform: translateY(-1px);
 }
 
+.oeuvre-image {
+  overflow: hidden;
+  background-color: var(--color-card-bg);
+}
+
+.oeuvre-image img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .oeuvre-image .placeholder-image {
   min-height: 250px;
   border-radius: 0;
