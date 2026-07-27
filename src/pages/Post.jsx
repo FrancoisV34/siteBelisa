@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link } from 'react-router'
 import { motion } from 'framer-motion'
 import LikeButton from '../components/LikeButton.jsx'
 import CommentSection from '../components/CommentSection.jsx'

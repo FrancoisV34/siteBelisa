@@ -24,7 +24,7 @@
     "lucide-react": "^0.574.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.1.0",
+    "react-router": "^8.3.0",
     "xss": "^1.0.15"
   },
   "devDependencies": {

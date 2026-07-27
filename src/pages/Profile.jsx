@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import Avatar from '../components/Avatar.jsx'

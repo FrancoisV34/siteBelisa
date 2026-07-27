@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { ArrowUp, ArrowDown, Plus, Trash2 } from 'lucide-react'
 
 export default function OeuvresList() {
