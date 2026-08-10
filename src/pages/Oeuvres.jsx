@@ -61,7 +61,7 @@ function Oeuvres() {
           whileInView="visible"
           viewport={{ once: true, amount: 'some' }}
         >
-          {oeuvres.map((oeuvre) => (
+          {oeuvres.map((oeuvre, i) => (
             <motion.article
               key={oeuvre.id}
               className="oeuvre-card"
@@ -74,7 +74,8 @@ function Oeuvres() {
                   <img
                     src={oeuvre.image_url}
                     alt={`Couverture de « ${oeuvre.title} »`}
-                    loading="lazy"
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
                   />
                 ) : (
                   <div className="placeholder-image">{oeuvre.title}</div>

@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Upload, X, Image as ImageIcon } from 'lucide-react'
+import { optimizeImage, formatBytes, MAX_EDGE } from '../lib/image.js'
 
 const ACCEPTED = 'image/jpeg,image/png,image/webp,image/gif'
 
@@ -7,15 +8,18 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState(null)
   const [dragOver, setDragOver] = useState(false)
+  const [saved, setSaved] = useState(null)
   const inputRef = useRef(null)
 
   const upload = async (file) => {
     if (!file) return
     setError(null)
+    setSaved(null)
     setUploading(true)
     try {
+      const optimized = await optimizeImage(file)
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file', optimized)
       const r = await fetch('/api/upload', {
         method: 'POST',
         credentials: 'include',
@@ -24,6 +28,9 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
       const data = await r.json()
       if (!r.ok) throw new Error(data.error || 'Upload failed')
       onChange(data.url)
+      if (optimized.size < file.size) {
+        setSaved({ from: file.size, to: optimized.size })
+      }
     } catch (e) {
       setError(e.message)
     } finally {
@@ -110,6 +117,12 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
       />
+      {saved && (
+        <p className="image-upload-saved">
+          Image optimisée&nbsp;: {formatBytes(saved.from)} → {formatBytes(saved.to)}
+          {' '}(redimensionnée à {MAX_EDGE}px max, convertie en WebP)
+        </p>
+      )}
       {error && <p className="auth-error">{error}</p>}
     </div>
   )

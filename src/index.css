@@ -81,6 +81,11 @@ img {
 
 .main-content {
   flex: 1;
+  /* Reserve a viewport's worth of height so the footer starts below the fold.
+     Without this it sits at the bottom of the viewport while data loads, then
+     gets pushed down when content arrives — a large layout shift on every
+     data-driven page. */
+  min-height: calc(100vh - 4.5rem);
 }
 
 /* ===== Navbar — Glassmorphism ===== */
@@ -2242,4 +2247,10 @@ img {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.image-upload-saved {
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #1f7a4d;
 }

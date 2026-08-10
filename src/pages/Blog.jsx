@@ -65,7 +65,7 @@ export default function Blog() {
         {!error && posts && posts.length === 0 && (
           <p className="blog-empty">Aucun article publié pour le moment.</p>
         )}
-        {posts && posts.map((p) => (
+        {posts && posts.map((p, i) => (
           <motion.article
             key={p.id}
             className="blog-card"
@@ -77,7 +77,12 @@ export default function Blog() {
             <Link to={`/blog/${p.slug}`} className="blog-card-link">
               {p.cover_image && (
                 <div className="blog-card-cover">
-                  <img src={p.cover_image} alt={p.image_alt || p.title} loading="lazy" />
+                  <img
+                    src={p.cover_image}
+                    alt={p.image_alt || p.title}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                  />
                 </div>
               )}
               <div className="blog-card-body">

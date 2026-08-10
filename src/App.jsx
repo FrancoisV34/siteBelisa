@@ -47,6 +47,10 @@ function App() {
       <ScrollToTop />
       <Navbar />
       <main className="main-content">
+        {/* Keep the first-mount fade. It looks decorative, but it also covers
+            the moment React replaces the server-injected markup: without it the
+            swap is visible and CLS on /oeuvres goes from 0.006 to 0.222, while
+            skipping it buys only ~50ms of LCP. Measured, not assumed. */}
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
