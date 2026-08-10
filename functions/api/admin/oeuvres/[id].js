@@ -1,6 +1,7 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
 import { sanitizePlainText } from '../../../_lib/sanitize.js'
+import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
@@ -34,16 +35,24 @@ export async function onRequestPatch({ request, env, params }) {
     const imageUrl = body.image_url !== undefined ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null) : existing.image_url
     const bookUrl = body.book_url !== undefined ? (body.book_url ? String(body.book_url).trim().slice(0, 500) : null) : existing.book_url
     const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url
+    const isbn = body.isbn !== undefined ? (body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null) : existing.isbn
     const status = body.status === 'visible' || body.status === 'hidden' ? body.status : existing.status
 
     if (!title) return badRequest('Title required')
 
+    // Changing a slug breaks every existing link to the page, so it only moves
+    // when the admin edits the field itself — never as a side effect of a title
+    // change. An empty submitted slug falls back to the title.
+    const slug = body.slug !== undefined && slugify(body.slug || title) !== existing.slug
+      ? await uniqueSlugIn(env, 'oeuvres', slugify(body.slug || title), id)
+      : existing.slug
+
     const now = Math.floor(Date.now() / 1000)
     await env.DB.prepare(
-      `UPDATE oeuvres SET title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, status=?, updated_at=? WHERE id=?`
-    ).bind(title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, status, now, id).run()
+      `UPDATE oeuvres SET slug=?, title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, isbn=?, status=?, updated_at=? WHERE id=?`
+    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, status, now, id).run()
 
-    return json({ oeuvre: { id, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, status, position: existing.position } })
+    return json({ oeuvre: { id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, status, position: existing.position } })
   } catch (e) {
     return serverError(e.message)
   }

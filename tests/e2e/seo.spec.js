@@ -102,6 +102,41 @@ test.describe('SEO injection', () => {
     await expect(page.locator('[data-seo-prerender]')).toHaveCount(0)
   })
 
+  test('each oeuvre has its own page with Book schema', async ({ request }) => {
+    const list = await (await request.get('/oeuvres')).text()
+    const first = list.match(/href="(\/oeuvres\/[^"]+)"/)
+    test.skip(!first, 'no visible oeuvre in this database')
+
+    const res = await request.get(first[1])
+    expect(res.status()).toBe(200)
+    const html = await res.text()
+
+    const data = JSON.parse(
+      html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]
+    )
+    const book = data['@graph'].find((n) => n['@type'] === 'Book')
+    expect(book).toBeTruthy()
+    expect(book.author['@id']).toContain('#person')
+    expect(book.url).toContain(first[1])
+
+    const crumbs = data['@graph'].find((n) => n['@type'] === 'BreadcrumbList')
+    expect(crumbs.itemListElement).toHaveLength(3)
+
+    // Retail links are commercial; they must not pass authority.
+    if (html.includes('book_url') || html.includes('amazon')) {
+      expect(html).not.toMatch(/<a[^>]+amazon[^>]+>(?![\s\S]*sponsored)/)
+    }
+  })
+
+  test('oeuvre pages are listed in the sitemap', async ({ request }) => {
+    const list = await (await request.get('/oeuvres')).text()
+    const first = list.match(/href="(\/oeuvres\/[^"]+)"/)
+    test.skip(!first, 'no visible oeuvre in this database')
+
+    const sitemap = await (await request.get('/sitemap.xml')).text()
+    expect(sitemap).toContain(`${first[1]}</loc>`)
+  })
+
   test('article pages carry Article schema with dates', async ({ request }) => {
     const blog = await (await request.get('/blog')).text()
     const firstPost = blog.match(/href="(\/blog\/[^"]+)"/)

@@ -6,6 +6,7 @@ import Footer from './components/Footer.jsx'
 import ScrollToTop from './components/ScrollToTop.jsx'
 import Home from './pages/Home.jsx'
 import Oeuvres from './pages/Oeuvres.jsx'
+import Oeuvre from './pages/Oeuvre.jsx'
 import Blog from './pages/Blog.jsx'
 import Post from './pages/Post.jsx'
 import Guestbook from './pages/Guestbook.jsx'
@@ -57,6 +58,7 @@ function App() {
             <Routes location={location}>
               <Route path="/" element={<Home />} />
               <Route path="/oeuvres" element={<Oeuvres />} />
+              <Route path="/oeuvres/:slug" element={<Oeuvre />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<Post />} />
               <Route path="/livre-d-or" element={<Guestbook />} />

@@ -193,7 +193,7 @@ async function resolvePost(env, slug) {
 
 async function resolveOeuvres(env) {
   const { results } = await env.DB.prepare(
-    `SELECT title, year, description, image_url FROM oeuvres
+    `SELECT slug, title, year, description, image_url FROM oeuvres
      WHERE status = 'visible' ORDER BY position ASC, id ASC`
   ).all()
   const oeuvres = results || []
@@ -203,7 +203,7 @@ async function resolveOeuvres(env) {
     oeuvres
       .map(
         (o) =>
-          `<li><h2>${escapeHtml(o.title)}</h2>` +
+          `<li><a href="/oeuvres/${escapeHtml(o.slug)}"><h2>${escapeHtml(o.title)}</h2></a>` +
           (o.year ? `<p>${escapeHtml(o.year)}</p>` : '') +
           (o.description ? `<p>${escapeHtml(o.description)}</p>` : '') +
           `</li>`
@@ -231,8 +231,102 @@ async function resolveOeuvres(env) {
         itemListElement: oeuvres.map((o, i) => ({
           '@type': 'ListItem',
           position: i + 1,
+          url: absoluteUrl(`/oeuvres/${o.slug}`),
           name: o.title,
         })),
+      },
+    ],
+    main: wrap(main),
+  }
+}
+
+// Editions carry the retail links. Google reads bookFormat + isbn here to tie
+// the page to a real edition, which is what unlocks Book Actions.
+function bookEditions(oeuvre) {
+  const editions = []
+  if (oeuvre.book_url) {
+    editions.push({
+      '@type': 'BookEdition',
+      bookFormat: 'https://schema.org/Paperback',
+      ...(oeuvre.isbn ? { isbn: oeuvre.isbn } : {}),
+      ...(oeuvre.year ? { datePublished: String(oeuvre.year) } : {}),
+      inLanguage: 'fr-FR',
+      author: authorRef(),
+      potentialAction: {
+        '@type': 'BuyAction',
+        target: oeuvre.book_url,
+      },
+    })
+  }
+  if (oeuvre.ebook_url) {
+    editions.push({
+      '@type': 'BookEdition',
+      bookFormat: 'https://schema.org/EBook',
+      ...(oeuvre.year ? { datePublished: String(oeuvre.year) } : {}),
+      inLanguage: 'fr-FR',
+      author: authorRef(),
+      potentialAction: {
+        '@type': 'BuyAction',
+        target: oeuvre.ebook_url,
+      },
+    })
+  }
+  return editions
+}
+
+async function resolveOeuvre(env, slug) {
+  const oeuvre = await env.DB.prepare(
+    `SELECT slug, title, year, technique, dimensions, description,
+            image_url, book_url, ebook_url, isbn
+     FROM oeuvres WHERE slug = ? AND status = 'visible'`
+  ).bind(slug).first()
+
+  if (!oeuvre) return null
+
+  const facts = [oeuvre.year, oeuvre.technique, oeuvre.dimensions].filter(Boolean).join(' — ')
+  const description = truncate(
+    oeuvre.description || `${oeuvre.title}, ouvrage de ${SITE_NAME}${facts ? ` (${facts})` : ''}.`
+  )
+  const image = oeuvre.image_url || DEFAULT_OG_IMAGE
+  const path = `/oeuvres/${oeuvre.slug}`
+
+  const main =
+    (oeuvre.image_url
+      ? `<img src="${escapeHtml(oeuvre.image_url)}" alt="Couverture de « ${escapeHtml(oeuvre.title)} »" />`
+      : '') +
+    `<article><h1>${escapeHtml(oeuvre.title)}</h1>` +
+    (facts ? `<p>${escapeHtml(facts)}</p>` : '') +
+    (oeuvre.description ? `<p>${escapeHtml(oeuvre.description)}</p>` : '') +
+    (oeuvre.isbn ? `<p>ISBN : ${escapeHtml(oeuvre.isbn)}</p>` : '') +
+    `</article>`
+
+  const editions = bookEditions(oeuvre)
+
+  return {
+    title: pageTitle(oeuvre.title),
+    description,
+    ogImage: image,
+    ogType: 'book',
+    schemas: [
+      personSchema(),
+      webSiteSchema(),
+      breadcrumbSchema([
+        { name: 'Accueil', path: '/' },
+        { name: 'Les ouvrages', path: '/oeuvres' },
+        { name: oeuvre.title, path },
+      ]),
+      {
+        '@type': 'Book',
+        name: oeuvre.title,
+        url: absoluteUrl(path),
+        author: authorRef(),
+        publisher: authorRef(),
+        description,
+        image: absoluteUrl(image),
+        inLanguage: 'fr-FR',
+        ...(oeuvre.isbn ? { isbn: oeuvre.isbn } : {}),
+        ...(oeuvre.year ? { datePublished: String(oeuvre.year) } : {}),
+        ...(editions.length ? { workExample: editions } : {}),
       },
     ],
     main: wrap(main),
@@ -288,6 +382,9 @@ export async function resolvePage(pathname, env) {
   else if (path.startsWith('/blog/')) {
     const slug = decodeURIComponent(path.slice('/blog/'.length))
     if (slug && !slug.includes('/')) meta = await resolvePost(env, slug)
+  } else if (path.startsWith('/oeuvres/')) {
+    const slug = decodeURIComponent(path.slice('/oeuvres/'.length))
+    if (slug && !slug.includes('/')) meta = await resolveOeuvre(env, slug)
   } else if (STATIC_ROUTES.has(path)) meta = resolveSimple(path)
 
   // Admin routes exist in the SPA but have nothing to index: serve the shell

@@ -56,6 +56,26 @@ export async function onRequestGet({ env }) {
     console.error('[sitemap] posts query failed', e)
   }
 
+  try {
+    const oeuvres = await env.DB.prepare(
+      `SELECT slug, updated_at FROM oeuvres
+       WHERE status = 'visible' ORDER BY position ASC, id ASC`
+    ).all()
+
+    for (const o of oeuvres.results || []) {
+      entries.push(
+        urlEntry({
+          loc: absoluteUrl(`/oeuvres/${o.slug}`),
+          lastmod: isoDate(o.updated_at),
+          changefreq: 'monthly',
+          priority: '0.8',
+        })
+      )
+    }
+  } catch (e) {
+    console.error('[sitemap] oeuvres query failed', e)
+  }
+
   const body =
     '<?xml version="1.0" encoding="UTF-8"?>' +
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' +
