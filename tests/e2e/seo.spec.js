@@ -137,6 +137,40 @@ test.describe('SEO injection', () => {
     expect(sitemap).toContain(`${first[1]}</loc>`)
   })
 
+  test('blog pagination is crawlable and canonicalised', async ({ request }) => {
+    const first = await (await request.get('/blog')).text()
+    const next = first.match(/<link rel="next" href="([^"]+)"/)
+    test.skip(!next, 'not enough posts to paginate in this database')
+
+    const path = new URL(next[1]).pathname
+    const res = await request.get(path)
+    expect(res.status()).toBe(200)
+
+    const html = await res.text()
+    // Page 2 must not claim to be /blog, or it would never be indexed.
+    expect(html).toContain(`<link rel="canonical" href="${next[1]}">`)
+    expect(html).toMatch(/<link rel="prev" href="[^"]+\/blog">/)
+    expect(html).toMatch(/<title>Blog — page 2[^<]*<\/title>/)
+
+    // Page 1 duplicates /blog and must not be a second URL for it.
+    const dup = await request.get('/blog/page/1', { maxRedirects: 0 })
+    expect(dup.status()).toBe(301)
+
+    // Past the end is a real 404, not an empty page Google would index as thin.
+    expect((await request.get('/blog/page/9999')).status()).toBe(404)
+
+    const sitemap = await (await request.get('/sitemap.xml')).text()
+    expect(sitemap).toContain(`<loc>${next[1]}</loc>`)
+  })
+
+  test('trailing slashes redirect instead of duplicating the page', async ({ request }) => {
+    for (const path of ['/blog/', '/oeuvres/']) {
+      const res = await request.get(path, { maxRedirects: 0 })
+      expect(res.status(), path).toBe(301)
+      expect(res.headers()['location']).toBe(path.replace(/\/$/, ''))
+    }
+  })
+
   test('article pages carry Article schema with dates', async ({ request }) => {
     const blog = await (await request.get('/blog')).text()
     const firstPost = blog.match(/href="(\/blog\/[^"]+)"/)

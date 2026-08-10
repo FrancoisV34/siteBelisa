@@ -33,6 +33,23 @@ export async function onRequestGet({ env }) {
   )
 
   try {
+    // Paginated blog pages need to be crawlable too, otherwise posts past the
+    // first page are only reachable from the sitemap itself.
+    const totalRow = await env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE p.status = 'published' AND u.status = 'active'`
+    ).first()
+    const totalPages = Math.ceil((totalRow?.n ?? 0) / 20)
+    for (let page = 2; page <= totalPages; page++) {
+      entries.push(
+        urlEntry({
+          loc: absoluteUrl(`/blog/page/${page}`),
+          changefreq: 'weekly',
+          priority: '0.5',
+        })
+      )
+    }
+
     const posts = await env.DB.prepare(
       `SELECT p.slug, p.updated_at, p.published_at
        FROM posts p JOIN users u ON u.id = p.author_id

@@ -49,6 +49,23 @@ Si le domaine historique `belisawagner.fr` est récupéré (procédure SYRELI en
 cours), mettre `SITE_URL` à jour **et** poser une redirection 301 permanente
 depuis l'ancien domaine, pour ne pas perdre l'acquis.
 
+## Pagination du blog
+
+`/blog` affiche les 20 articles les plus récents, puis `/blog/page/2`, `/blog/page/3`…
+Chaque page porte son propre titre et son propre canonical, avec des liens
+`rel="prev"` / `rel="next"`, et figure dans le sitemap.
+
+Trois cas volontairement traités comme des erreurs plutôt que comme des pages :
+
+- `/blog/page/1` → 301 vers `/blog` (doublon, pas page manquante) ;
+- une page au-delà de la dernière → 404, pour ne pas offrir à Google une liste
+  vide qu'il indexerait comme du contenu pauvre ;
+- côté React, un numéro hors limites renvoie l'utilisateur sur `/blog`.
+
+`POSTS_PER_PAGE` dans `functions/_lib/seo-resolve.js` et `PER_PAGE` dans
+`src/pages/Blog.jsx` doivent rester égaux, sinon la liste injectée et la liste
+rendue par React affichent des articles différents.
+
 ## Ajouter une route publique
 
 Une route absente de la table de résolution renvoie un vrai 404 — c'est
@@ -118,7 +135,9 @@ Mesures sur profil bridé (5 Mbps, CPU ÷4), avant et après le chantier :
 | `/oeuvres/:slug` | 1908 → 568 ms | 0,083 → 0,001 |
 | `/blog` | 1924 → 1908 ms | 0,251 → 0,008 |
 
-Deux pièges rencontrés, à ne pas réintroduire :
+Le bundle public pèse 126 Ko de JavaScript transférés.
+
+Trois pièges rencontrés, à ne pas réintroduire :
 
 - **`.main-content` a un `min-height`.** Sans lui, le footer se place en bas du
   viewport pendant le chargement des données puis se fait chasser quand elles
@@ -127,6 +146,9 @@ Deux pièges rencontrés, à ne pas réintroduire :
   décoratif, mais il couvre le moment où React remplace le HTML injecté. Le
   supprimer fait passer la CLS de `/oeuvres` de 0,006 à 0,222 pour ~50 ms de LCP
   gagnés.
+- **`SubmitArticleModal` doit rester en `lazy()`.** Il importe TipTap ; en import
+  direct, le chunk principal passe de 402 à 789 Ko, que tout visiteur anonyme
+  télécharge pour lire le blog.
 
 ## À faire après la mise en ligne du domaine
 

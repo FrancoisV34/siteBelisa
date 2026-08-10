@@ -72,6 +72,9 @@ function buildHead(meta) {
     metaTag('name', 'description', meta.description),
     metaTag('name', 'robots', meta.robots),
     `<link rel="canonical" href="${escapeHtml(meta.canonical)}">`,
+    ...(meta.links || []).map(
+      (l) => `<link rel="${escapeHtml(l.rel)}" href="${escapeHtml(l.href)}">`
+    ),
     metaTag('property', 'og:type', meta.ogType),
     metaTag('property', 'og:title', meta.title),
     metaTag('property', 'og:description', meta.description),
@@ -122,6 +125,15 @@ export async function onRequest(context) {
     return new Response(null, {
       status: 301,
       headers: withSecurityHeaders(new Headers({ location: target })),
+    })
+  }
+
+  // /blog/page/1 is a duplicate of /blog, not a missing page — redirect rather
+  // than 404, so a hand-typed or mistakenly linked URL still lands somewhere.
+  if (url.pathname === '/blog/page/1') {
+    return new Response(null, {
+      status: 301,
+      headers: withSecurityHeaders(new Headers({ location: '/blog' + url.search })),
     })
   }
 

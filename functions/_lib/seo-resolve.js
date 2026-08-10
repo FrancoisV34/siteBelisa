@@ -85,14 +85,38 @@ async function resolveHome(env) {
   }
 }
 
-async function resolveBlogIndex(env) {
+// Must match PER_PAGE in src/pages/Blog.jsx: the injected list and the React
+// list have to show the same posts.
+const POSTS_PER_PAGE = 20
+
+async function resolveBlogIndex(env, page = 1) {
+  const totalRow = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM posts p JOIN users u ON u.id = p.author_id
+     WHERE p.status = 'published' AND u.status = 'active'`
+  ).first()
+  const total = totalRow?.n ?? 0
+  const totalPages = Math.max(1, Math.ceil(total / POSTS_PER_PAGE))
+
+  // A page number past the end is not a page: 404 rather than serve an empty
+  // list that Google would index as thin content.
+  if (page > totalPages) return null
+
   const { results } = await env.DB.prepare(
     `SELECT p.slug, p.title, p.excerpt, p.published_at
      FROM posts p JOIN users u ON u.id = p.author_id
      WHERE p.status = 'published' AND u.status = 'active'
-     ORDER BY p.published_at DESC LIMIT 20`
-  ).all()
+     ORDER BY p.published_at DESC LIMIT ? OFFSET ?`
+  ).bind(POSTS_PER_PAGE, (page - 1) * POSTS_PER_PAGE).all()
   const posts = results || []
+
+  const path = page === 1 ? '/blog' : `/blog/page/${page}`
+  const links = []
+  if (page > 1) {
+    links.push({ rel: 'prev', href: absoluteUrl(page === 2 ? '/blog' : `/blog/page/${page - 1}`) })
+  }
+  if (page < totalPages) {
+    links.push({ rel: 'next', href: absoluteUrl(`/blog/page/${page + 1}`) })
+  }
 
   const main =
     `<h1>Blog</h1>` +
@@ -108,9 +132,13 @@ async function resolveBlogIndex(env) {
     `</ul>`
 
   return {
-    title: pageTitle('Blog'),
+    title: pageTitle(page === 1 ? 'Blog' : `Blog — page ${page}`),
+    canonicalPath: path,
+    links,
     description: truncate(
-      `Les articles et actualités de ${SITE_NAME}, romancière. ${posts.length} article${posts.length > 1 ? 's' : ''} à lire.`
+      page === 1
+        ? `Les articles et actualités de ${SITE_NAME}, romancière. ${total} article${total > 1 ? 's' : ''} à lire.`
+        : `Articles de ${SITE_NAME}, page ${page} sur ${totalPages}.`
     ),
     ogImage: DEFAULT_OG_IMAGE,
     ogType: 'website',
@@ -389,7 +417,11 @@ export async function resolvePage(pathname, env) {
   if (path === '/') meta = await resolveHome(env)
   else if (path === '/blog') meta = await resolveBlogIndex(env)
   else if (path === '/oeuvres') meta = await resolveOeuvres(env)
-  else if (path.startsWith('/blog/')) {
+  else if (/^\/blog\/page\/\d+$/.test(path)) {
+    const page = parseInt(path.slice('/blog/page/'.length), 10)
+    // /blog/page/1 duplicates /blog; it is not a URL we want indexed.
+    if (page > 1) meta = await resolveBlogIndex(env, page)
+  } else if (path.startsWith('/blog/')) {
     const slug = decodeURIComponent(path.slice('/blog/'.length))
     if (slug && !slug.includes('/')) meta = await resolvePost(env, slug)
   } else if (path.startsWith('/oeuvres/')) {
@@ -413,8 +445,9 @@ export async function resolvePage(pathname, env) {
   if (!meta) return null
 
   return {
+    links: [],
     ...meta,
-    canonical: absoluteUrl(path),
+    canonical: absoluteUrl(meta.canonicalPath || path),
     robots: isNoIndex(path) ? 'noindex, nofollow' : 'index, follow',
   }
 }

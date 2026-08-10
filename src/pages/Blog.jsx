@@ -1,5 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from 'react'
-import { Link } from 'react-router'
+import { Link, useParams, useNavigate } from 'react-router'
 import { motion } from 'framer-motion'
 import { PenLine } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -15,19 +15,37 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 }
 
+const PER_PAGE = 20
+
 export default function Blog() {
   const { user } = useAuth()
+  const { page: pageParam } = useParams()
+  const navigate = useNavigate()
+  const page = Math.max(1, parseInt(pageParam || '1', 10) || 1)
+
   const [posts, setPosts] = useState(null)
+  const [total, setTotal] = useState(0)
   const [error, setError] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [submitMessage, setSubmitMessage] = useState(null)
 
   useEffect(() => {
-    fetch('/api/posts')
+    setPosts(null)
+    setError(null)
+    const offset = (page - 1) * PER_PAGE
+    fetch(`/api/posts?limit=${PER_PAGE}&offset=${offset}`)
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
-      .then((data) => setPosts(data.posts))
+      .then((data) => {
+        setPosts(data.posts)
+        setTotal(data.total ?? data.posts.length)
+        // A page number past the end is a dead URL; send it back to the list
+        // rather than showing an empty shell.
+        if (data.posts.length === 0 && page > 1) navigate('/blog', { replace: true })
+      })
       .catch((e) => setError(e.message))
-  }, [])
+  }, [page, navigate])
+
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
 
   return (
     <div className="page blog-page">
@@ -101,6 +119,28 @@ export default function Blog() {
           </motion.article>
         ))}
       </section>
+
+      {totalPages > 1 && (
+        <nav className="pagination" aria-label="Pages du blog">
+          {page > 1 && (
+            <Link
+              to={page === 2 ? '/blog' : `/blog/page/${page - 1}`}
+              className="pagination-link"
+              rel="prev"
+            >
+              ← Précédent
+            </Link>
+          )}
+          <span className="pagination-status" aria-current="page">
+            Page {page} sur {totalPages}
+          </span>
+          {page < totalPages && (
+            <Link to={`/blog/page/${page + 1}`} className="pagination-link" rel="next">
+              Suivant →
+            </Link>
+          )}
+        </nav>
+      )}
 
       {modalOpen && (
         <Suspense fallback={null}>

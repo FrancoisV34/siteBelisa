@@ -6,6 +6,11 @@ export async function onRequestGet({ env, request }) {
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '20', 10), 50)
     const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0)
 
+    const total = await env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM posts p JOIN users u ON u.id = p.author_id
+       WHERE p.status = 'published' AND u.status = 'active'`
+    ).first()
+
     const { results } = await env.DB.prepare(
       `SELECT p.id, p.slug, p.title, p.excerpt, p.cover_image, p.image_alt, p.published_at,
               u.display_name AS author_name
@@ -16,7 +21,12 @@ export async function onRequestGet({ env, request }) {
        LIMIT ? OFFSET ?`
     ).bind(limit, offset).all()
 
-    return json({ posts: results })
+    return json({
+      posts: results,
+      total: total?.n ?? 0,
+      limit,
+      offset,
+    })
   } catch (e) {
     return serverError(e)
   }

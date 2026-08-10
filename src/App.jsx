@@ -64,6 +64,7 @@ function App() {
               <Route path="/oeuvres" element={<Oeuvres />} />
               <Route path="/oeuvres/:slug" element={<Oeuvre />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/page/:page" element={<Blog />} />
               <Route path="/blog/:slug" element={<Post />} />
               <Route path="/livre-d-or" element={<Guestbook />} />
               <Route path="/login" element={<Login />} />

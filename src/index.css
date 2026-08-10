@@ -2299,3 +2299,33 @@ img {
   flex-wrap: wrap;
   justify-content: center;
 }
+
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto var(--spacing-2xl);
+  padding: 1.5rem 2rem 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.pagination-link {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pagination-link:hover {
+  text-decoration: underline;
+}
+
+.pagination-status {
+  font-size: 0.82rem;
+  color: var(--color-text-light);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
