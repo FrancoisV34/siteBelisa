@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import RichEditor from '../../components/RichEditor.jsx'
 import ImageUpload from '../../components/ImageUpload.jsx'
+import SeoFields from '../../components/SeoFields.jsx'
 
 export default function PostEditor() {
   const { id } = useParams()
@@ -16,6 +17,8 @@ export default function PostEditor() {
   const [coverImage, setCoverImage] = useState('')
   const [contentHtml, setContentHtml] = useState('')
   const [status, setStatus] = useState('draft')
+  const [seo, setSeo] = useState({ meta_description: '', og_image: '', image_alt: '' })
+  const [slug, setSlug] = useState('')
 
   useEffect(() => {
     if (isNew) return
@@ -27,6 +30,12 @@ export default function PostEditor() {
         setCoverImage(d.post.cover_image || '')
         setContentHtml(d.post.content_html)
         setStatus(d.post.status)
+        setSlug(d.post.slug || '')
+        setSeo({
+          meta_description: d.post.meta_description || '',
+          og_image: d.post.og_image || '',
+          image_alt: d.post.image_alt || '',
+        })
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -40,6 +49,7 @@ export default function PostEditor() {
         title, excerpt, cover_image: coverImage,
         content_html: contentHtml,
         status: newStatus ?? status,
+        ...seo,
       }
       const r = await fetch(isNew ? '/api/admin/posts' : `/api/admin/posts/${id}`, {
         method: isNew ? 'POST' : 'PATCH',
@@ -50,7 +60,10 @@ export default function PostEditor() {
       const data = await r.json()
       if (!r.ok) throw new Error(data.error || 'Erreur')
       if (isNew) navigate(`/admin/posts/${data.post.id}`, { replace: true })
-      else setStatus(data.post.status)
+      else {
+        setStatus(data.post.status)
+        setSlug(data.post.slug || slug)
+      }
     } catch (e) {
       setError(e.message)
     } finally {
@@ -89,6 +102,17 @@ export default function PostEditor() {
           <span>Contenu</span>
           <RichEditor value={contentHtml} onChange={setContentHtml} />
         </label>
+        <SeoFields
+          value={seo}
+          onChange={setSeo}
+          canonicalPath={`/blog/${slug || '…'}`}
+          fallbacks={{
+            title: title,
+            description: excerpt,
+            image: coverImage,
+            imageAlt: title,
+          }}
+        />
       </div>
 
       <div className="admin-page-actions" style={{ marginTop: '2rem', justifyContent: 'flex-end' }}>

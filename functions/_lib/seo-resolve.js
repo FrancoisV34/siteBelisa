@@ -138,6 +138,7 @@ async function resolveBlogIndex(env) {
 async function resolvePost(env, slug) {
   const post = await env.DB.prepare(
     `SELECT p.slug, p.title, p.content_html, p.excerpt, p.cover_image,
+            p.meta_description, p.og_image, p.image_alt,
             p.published_at, p.updated_at, u.display_name AS author_name
      FROM posts p JOIN users u ON u.id = p.author_id
      WHERE p.slug = ? AND p.status = 'published' AND u.status = 'active'`
@@ -145,14 +146,19 @@ async function resolvePost(env, slug) {
 
   if (!post) return null
 
-  const description = truncate(post.excerpt || htmlToText(post.content_html))
-  const image = post.cover_image || DEFAULT_OG_IMAGE
+  // Authored metadata wins; everything else is a fallback so a page is never
+  // left without a description or a share image.
+  const description = truncate(
+    post.meta_description || post.excerpt || htmlToText(post.content_html)
+  )
+  const image = post.og_image || post.cover_image || DEFAULT_OG_IMAGE
+  const coverAlt = post.image_alt || post.title
   const published = formatIsoDate(post.published_at)
   const modified = formatIsoDate(post.updated_at) || published
 
   const main =
     (post.cover_image
-      ? `<img src="${escapeHtml(post.cover_image)}" alt="${escapeHtml(post.title)}" />`
+      ? `<img src="${escapeHtml(post.cover_image)}" alt="${escapeHtml(coverAlt)}" />`
       : '') +
     `<article><h1>${escapeHtml(post.title)}</h1>` +
     `<p>Par ${escapeHtml(post.author_name)}` +
@@ -277,7 +283,8 @@ function bookEditions(oeuvre) {
 async function resolveOeuvre(env, slug) {
   const oeuvre = await env.DB.prepare(
     `SELECT slug, title, year, technique, dimensions, description,
-            image_url, book_url, ebook_url, isbn
+            image_url, book_url, ebook_url, isbn,
+            meta_description, og_image, image_alt
      FROM oeuvres WHERE slug = ? AND status = 'visible'`
   ).bind(slug).first()
 
@@ -285,14 +292,17 @@ async function resolveOeuvre(env, slug) {
 
   const facts = [oeuvre.year, oeuvre.technique, oeuvre.dimensions].filter(Boolean).join(' — ')
   const description = truncate(
-    oeuvre.description || `${oeuvre.title}, ouvrage de ${SITE_NAME}${facts ? ` (${facts})` : ''}.`
+    oeuvre.meta_description ||
+      oeuvre.description ||
+      `${oeuvre.title}, ouvrage de ${SITE_NAME}${facts ? ` (${facts})` : ''}.`
   )
-  const image = oeuvre.image_url || DEFAULT_OG_IMAGE
+  const image = oeuvre.og_image || oeuvre.image_url || DEFAULT_OG_IMAGE
+  const coverAlt = oeuvre.image_alt || `Couverture de « ${oeuvre.title} »`
   const path = `/oeuvres/${oeuvre.slug}`
 
   const main =
     (oeuvre.image_url
-      ? `<img src="${escapeHtml(oeuvre.image_url)}" alt="Couverture de « ${escapeHtml(oeuvre.title)} »" />`
+      ? `<img src="${escapeHtml(oeuvre.image_url)}" alt="${escapeHtml(coverAlt)}" />`
       : '') +
     `<article><h1>${escapeHtml(oeuvre.title)}</h1>` +
     (facts ? `<p>${escapeHtml(facts)}</p>` : '') +

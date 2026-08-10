@@ -44,7 +44,7 @@ export default function ImageUpload({ value, onChange, label = 'Image' }) {
 
       {value ? (
         <div className="image-upload-preview">
-          <img src={value} alt="" />
+          <img src={value} alt="Aperçu de l'image téléversée" />
           <button
             type="button"
             className="image-upload-remove"

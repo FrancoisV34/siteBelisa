@@ -7,7 +7,7 @@ export async function onRequestGet({ env, request }) {
     const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0)
 
     const { results } = await env.DB.prepare(
-      `SELECT p.id, p.slug, p.title, p.excerpt, p.cover_image, p.published_at,
+      `SELECT p.id, p.slug, p.title, p.excerpt, p.cover_image, p.image_alt, p.published_at,
               u.display_name AS author_name
        FROM posts p
        JOIN users u ON u.id = p.author_id

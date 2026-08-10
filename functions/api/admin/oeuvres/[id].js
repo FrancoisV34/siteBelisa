@@ -36,6 +36,9 @@ export async function onRequestPatch({ request, env, params }) {
     const bookUrl = body.book_url !== undefined ? (body.book_url ? String(body.book_url).trim().slice(0, 500) : null) : existing.book_url
     const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url
     const isbn = body.isbn !== undefined ? (body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null) : existing.isbn
+    const metaDescription = body.meta_description !== undefined ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null) : existing.meta_description
+    const ogImage = body.og_image !== undefined ? (body.og_image ? String(body.og_image).trim().slice(0, 500) : null) : existing.og_image
+    const imageAlt = body.image_alt !== undefined ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null) : existing.image_alt
     const status = body.status === 'visible' || body.status === 'hidden' ? body.status : existing.status
 
     if (!title) return badRequest('Title required')
@@ -49,10 +52,10 @@ export async function onRequestPatch({ request, env, params }) {
 
     const now = Math.floor(Date.now() / 1000)
     await env.DB.prepare(
-      `UPDATE oeuvres SET slug=?, title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, isbn=?, status=?, updated_at=? WHERE id=?`
-    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, status, now, id).run()
+      `UPDATE oeuvres SET slug=?, title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, isbn=?, meta_description=?, og_image=?, image_alt=?, status=?, updated_at=? WHERE id=?`
+    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, metaDescription, ogImage, imageAlt, status, now, id).run()
 
-    return json({ oeuvre: { id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, status, position: existing.position } })
+    return json({ oeuvre: { id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, meta_description: metaDescription, og_image: ogImage, image_alt: imageAlt, status, position: existing.position } })
   } catch (e) {
     return serverError(e.message)
   }

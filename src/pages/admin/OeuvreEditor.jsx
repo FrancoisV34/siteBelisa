@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import ImageUpload from '../../components/ImageUpload.jsx'
+import SeoFields from '../../components/SeoFields.jsx'
 
 export default function OeuvreEditor() {
   const { id } = useParams()
@@ -13,6 +14,7 @@ export default function OeuvreEditor() {
   const [form, setForm] = useState({
     title: '', slug: '', year: '', technique: '', dimensions: '', description: '',
     image_url: '', book_url: '', ebook_url: '', isbn: '', status: 'visible',
+    meta_description: '', og_image: '', image_alt: '',
   })
 
   useEffect(() => {
@@ -30,6 +32,9 @@ export default function OeuvreEditor() {
         book_url: d.oeuvre.book_url || '',
         ebook_url: d.oeuvre.ebook_url || '',
         isbn: d.oeuvre.isbn || '',
+        meta_description: d.oeuvre.meta_description || '',
+        og_image: d.oeuvre.og_image || '',
+        image_alt: d.oeuvre.image_alt || '',
         status: d.oeuvre.status || 'visible',
       }))
       .catch((e) => setError(e.message))
@@ -131,11 +136,22 @@ export default function OeuvreEditor() {
           />
           <small className="admin-hint">
             {form.slug
-              ? `Adresse : /oeuvres/${form.slug}`
+              ? `Adresse : /oeuvres/${form.slug}.`
               : 'Laissez vide pour générer automatiquement depuis le titre.'}
-            {!isNew && ' La modifier casse les liens existants vers cette page.'}
+            {!isNew && form.slug && ' La modifier casse les liens existants vers cette page.'}
           </small>
         </label>
+        <SeoFields
+          value={form}
+          onChange={setForm}
+          canonicalPath={`/oeuvres/${form.slug || '…'}`}
+          fallbacks={{
+            title: form.title,
+            description: form.description,
+            image: form.image_url,
+            imageAlt: form.title ? `Couverture de « ${form.title} »` : '',
+          }}
+        />
         <label>
           <span>Statut</span>
           <select value={form.status} onChange={onInput('status')}>

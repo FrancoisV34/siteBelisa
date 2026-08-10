@@ -77,7 +77,7 @@ export default function Blog() {
             <Link to={`/blog/${p.slug}`} className="blog-card-link">
               {p.cover_image && (
                 <div className="blog-card-cover">
-                  <img src={p.cover_image} alt="" loading="lazy" />
+                  <img src={p.cover_image} alt={p.image_alt || p.title} loading="lazy" />
                 </div>
               )}
               <div className="blog-card-body">

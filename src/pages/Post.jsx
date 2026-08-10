@@ -52,7 +52,7 @@ export default function Post() {
       >
         {post.cover_image && (
           <div className="post-cover">
-            <img src={post.cover_image} alt="" />
+            <img src={post.cover_image} alt={post.image_alt || post.title} fetchPriority="high" />
           </div>
         )}
         <header className="post-header">

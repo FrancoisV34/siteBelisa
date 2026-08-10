@@ -35,6 +35,9 @@ export async function onRequestPost({ request, env }) {
     const bookUrl = body.book_url ? String(body.book_url).trim().slice(0, 500) : null
     const ebookUrl = body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null
     const isbn = body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null
+    const metaDescription = body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null
+    const ogImage = body.og_image ? String(body.og_image).trim().slice(0, 500) : null
+    const imageAlt = body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null
     const status = body.status === 'hidden' ? 'hidden' : 'visible'
 
     // The slug is part of the public URL, so it is derived from the title
@@ -46,11 +49,11 @@ export async function onRequestPost({ request, env }) {
 
     const now = Math.floor(Date.now() / 1000)
     const r = await env.DB.prepare(
-      `INSERT INTO oeuvres (slug, title, year, technique, dimensions, description, image_url, book_url, ebook_url, isbn, position, status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, position, status, now, now).run()
+      `INSERT INTO oeuvres (slug, title, year, technique, dimensions, description, image_url, book_url, ebook_url, isbn, meta_description, og_image, image_alt, position, status, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, metaDescription, ogImage, imageAlt, position, status, now, now).run()
 
-    return json({ oeuvre: { id: r.meta.last_row_id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, position, status } })
+    return json({ oeuvre: { id: r.meta.last_row_id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, meta_description: metaDescription, og_image: ogImage, image_alt: imageAlt, position, status } })
   } catch (e) {
     return serverError(e.message)
   }
