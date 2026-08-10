@@ -50,11 +50,17 @@ export async function onRequestPatch({ request, env, params }) {
     const title = body.title !== undefined ? sanitizePlainText(body.title).trim() : post.title
     const contentHtml = body.content_html !== undefined ? sanitizeRichText(String(body.content_html).trim()) : post.content_html
     const excerpt = body.excerpt !== undefined
-    const metaDescription = body.meta_description !== undefined ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null) : post.meta_description
-    const ogImage = body.og_image !== undefined ? (body.og_image ? sanitizeCoverImage(body.og_image) : null) : post.og_image
-    const imageAlt = body.image_alt !== undefined ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null) : post.image_alt
       ? (body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null)
       : post.excerpt
+    const metaDescription = body.meta_description !== undefined
+      ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null)
+      : post.meta_description
+    const ogImage = body.og_image !== undefined
+      ? (body.og_image ? sanitizeCoverImage(body.og_image) : null)
+      : post.og_image
+    const imageAlt = body.image_alt !== undefined
+      ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null)
+      : post.image_alt
     let coverImage = post.cover_image
     if (body.cover_image !== undefined) {
       if (body.cover_image) {
