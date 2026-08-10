@@ -4,17 +4,11 @@ import { motion } from 'framer-motion'
 import { PenLine } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import SubmitArticleModal from '../components/SubmitArticleModal.jsx'
+import { formatDate, isoDate } from '../lib/date.js'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-}
-
-function formatDate(ts) {
-  if (!ts) return ''
-  return new Date(ts * 1000).toLocaleDateString('fr-FR', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
 }
 
 export default function Blog() {
@@ -89,7 +83,8 @@ export default function Blog() {
               <div className="blog-card-body">
                 <h2>{p.title}</h2>
                 <p className="blog-card-meta">
-                  {p.author_name} &middot; {formatDate(p.published_at)}
+                  {p.author_name} &middot;{' '}
+                  <time dateTime={isoDate(p.published_at)}>{formatDate(p.published_at)}</time>
                 </p>
                 {p.excerpt && <p className="blog-card-excerpt">{p.excerpt}</p>}
               </div>

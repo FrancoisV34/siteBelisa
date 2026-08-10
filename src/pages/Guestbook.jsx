@@ -2,12 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext.jsx'
-
-function formatDate(ts) {
-  return new Date(ts * 1000).toLocaleDateString('fr-FR', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-}
+import { formatDate, isoDate } from '../lib/date.js'
 
 export default function Guestbook() {
   const { user } = useAuth()
@@ -100,7 +95,8 @@ export default function Guestbook() {
           >
             <p className="guestbook-message">{e.message}</p>
             <p className="guestbook-meta">
-              — {e.display_name} &middot; {formatDate(e.created_at)}
+              — {e.display_name} &middot;{' '}
+              <time dateTime={isoDate(e.created_at)}>{formatDate(e.created_at)}</time>
             </p>
           </motion.li>
         ))}
