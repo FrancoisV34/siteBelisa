@@ -90,7 +90,7 @@ async function resolveBlogIndex(env) {
     `SELECT p.slug, p.title, p.excerpt, p.published_at
      FROM posts p JOIN users u ON u.id = p.author_id
      WHERE p.status = 'published' AND u.status = 'active'
-     ORDER BY p.published_at DESC LIMIT 50`
+     ORDER BY p.published_at DESC LIMIT 20`
   ).all()
   const posts = results || []
 

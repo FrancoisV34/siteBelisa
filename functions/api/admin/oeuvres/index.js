@@ -1,6 +1,6 @@
 import { json, badRequest, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
-import { sanitizePlainText } from '../../../_lib/sanitize.js'
+import { sanitizePlainText, sanitizeCoverImage } from '../../../_lib/sanitize.js'
 import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env }) {
@@ -36,7 +36,7 @@ export async function onRequestPost({ request, env }) {
     const ebookUrl = body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null
     const isbn = body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null
     const metaDescription = body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null
-    const ogImage = body.og_image ? String(body.og_image).trim().slice(0, 500) : null
+    const ogImage = body.og_image ? sanitizeCoverImage(body.og_image) : null
     const imageAlt = body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null
     const status = body.status === 'hidden' ? 'hidden' : 'visible'
 

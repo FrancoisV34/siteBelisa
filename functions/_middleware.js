@@ -108,8 +108,24 @@ function injectSeo(response, meta) {
 }
 
 export async function onRequest(context) {
-  const response = await context.next()
   const url = new URL(context.request.url)
+
+  // Serve one URL per page. Without this, /blog and /blog/ both return 200 with
+  // identical content; the canonical tag would let Google sort it out, but a
+  // redirect is unambiguous and costs no crawl budget.
+  if (
+    url.pathname.length > 1 &&
+    url.pathname.endsWith('/') &&
+    !NON_DOCUMENT_PREFIXES.some((p) => url.pathname.startsWith(p))
+  ) {
+    const target = url.pathname.replace(/\/+$/, '') + url.search
+    return new Response(null, {
+      status: 301,
+      headers: withSecurityHeaders(new Headers({ location: target })),
+    })
+  }
+
+  const response = await context.next()
 
   const isDocument =
     context.request.method === 'GET' &&

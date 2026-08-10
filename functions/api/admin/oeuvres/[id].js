@@ -1,6 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
-import { sanitizePlainText } from '../../../_lib/sanitize.js'
+import { sanitizePlainText, sanitizeCoverImage } from '../../../_lib/sanitize.js'
 import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env, params }) {
@@ -37,7 +37,7 @@ export async function onRequestPatch({ request, env, params }) {
     const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url
     const isbn = body.isbn !== undefined ? (body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null) : existing.isbn
     const metaDescription = body.meta_description !== undefined ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null) : existing.meta_description
-    const ogImage = body.og_image !== undefined ? (body.og_image ? String(body.og_image).trim().slice(0, 500) : null) : existing.og_image
+    const ogImage = body.og_image !== undefined ? (body.og_image ? sanitizeCoverImage(body.og_image) : null) : existing.og_image
     const imageAlt = body.image_alt !== undefined ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null) : existing.image_alt
     const status = body.status === 'visible' || body.status === 'hidden' ? body.status : existing.status
 
