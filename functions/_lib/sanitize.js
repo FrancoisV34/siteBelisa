@@ -108,6 +108,31 @@ export function sanitizePlainText(input) {
  * Returns the trimmed URL if valid, or `null` if invalid/empty.
  * Caller must convert null to a 400 (not silently store).
  */
+/**
+ * Validate an outbound retail link (Amazon and the like) before storage.
+ *
+ * These end up in an `href`, so a `javascript:` value would be an XSS vector
+ * even though only an admin can write one. Only absolute http(s) URLs are
+ * accepted — a relative link would make no sense for an external store.
+ *
+ * Returns the trimmed URL, or null.
+ */
+export function sanitizeExternalUrl(input) {
+  if (input == null) return null
+  const trimmed = String(input).trim().slice(0, 500)
+  if (!trimmed) return null
+
+  let parsed
+  try {
+    parsed = new URL(trimmed)
+  } catch {
+    return null
+  }
+  if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null
+
+  return trimmed
+}
+
 export function sanitizeCoverImage(input) {
   if (input == null) return null
   const trimmed = String(input).trim().slice(0, 500)

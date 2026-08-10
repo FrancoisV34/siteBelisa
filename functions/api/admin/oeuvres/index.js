@@ -1,6 +1,6 @@
 import { json, badRequest, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
-import { sanitizePlainText, sanitizeCoverImage } from '../../../_lib/sanitize.js'
+import { sanitizePlainText, sanitizeCoverImage, sanitizeExternalUrl } from '../../../_lib/sanitize.js'
 import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env }) {
@@ -31,9 +31,9 @@ export async function onRequestPost({ request, env }) {
     const technique = body.technique ? sanitizePlainText(body.technique).trim().slice(0, 200) : null
     const dimensions = body.dimensions ? sanitizePlainText(body.dimensions).trim().slice(0, 100) : null
     const description = body.description ? sanitizePlainText(body.description).trim().slice(0, 2000) : null
-    const imageUrl = body.image_url ? String(body.image_url).trim().slice(0, 500) : null
-    const bookUrl = body.book_url ? String(body.book_url).trim().slice(0, 500) : null
-    const ebookUrl = body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null
+    const imageUrl = body.image_url ? sanitizeCoverImage(body.image_url) : null
+    const bookUrl = body.book_url ? sanitizeExternalUrl(body.book_url) : null
+    const ebookUrl = body.ebook_url ? sanitizeExternalUrl(body.ebook_url) : null
     const isbn = body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null
     const metaDescription = body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null
     const ogImage = body.og_image ? sanitizeCoverImage(body.og_image) : null

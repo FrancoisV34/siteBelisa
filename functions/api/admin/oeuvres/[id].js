@@ -1,6 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
-import { sanitizePlainText, sanitizeCoverImage } from '../../../_lib/sanitize.js'
+import { sanitizePlainText, sanitizeCoverImage, sanitizeExternalUrl } from '../../../_lib/sanitize.js'
 import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env, params }) {
@@ -32,9 +32,9 @@ export async function onRequestPatch({ request, env, params }) {
     const technique = body.technique !== undefined ? (body.technique ? sanitizePlainText(body.technique).trim().slice(0, 200) : null) : existing.technique
     const dimensions = body.dimensions !== undefined ? (body.dimensions ? sanitizePlainText(body.dimensions).trim().slice(0, 100) : null) : existing.dimensions
     const description = body.description !== undefined ? (body.description ? sanitizePlainText(body.description).trim().slice(0, 2000) : null) : existing.description
-    const imageUrl = body.image_url !== undefined ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null) : existing.image_url
-    const bookUrl = body.book_url !== undefined ? (body.book_url ? String(body.book_url).trim().slice(0, 500) : null) : existing.book_url
-    const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url
+    const imageUrl = body.image_url !== undefined ? (body.image_url ? sanitizeCoverImage(body.image_url) : null) : existing.image_url
+    const bookUrl = body.book_url !== undefined ? (body.book_url ? sanitizeExternalUrl(body.book_url) : null) : existing.book_url
+    const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? sanitizeExternalUrl(body.ebook_url) : null) : existing.ebook_url
     const isbn = body.isbn !== undefined ? (body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null) : existing.isbn
     const metaDescription = body.meta_description !== undefined ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null) : existing.meta_description
     const ogImage = body.og_image !== undefined ? (body.og_image ? sanitizeCoverImage(body.og_image) : null) : existing.og_image

@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import { PenLine } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext.jsx'
-import SubmitArticleModal from '../components/SubmitArticleModal.jsx'
 import { formatDate, isoDate } from '../lib/date.js'
+
+// TipTap weighs ~500 KB and only ever loads inside this modal. Importing it
+// eagerly here put the whole rich-text editor in the main bundle, so every
+// anonymous visitor downloaded it just to read the blog.
+const SubmitArticleModal = lazy(() => import('../components/SubmitArticleModal.jsx'))
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -99,11 +103,13 @@ export default function Blog() {
       </section>
 
       {modalOpen && (
-        <SubmitArticleModal
-          mode="create"
-          onClose={() => setModalOpen(false)}
-          onSuccess={() => setSubmitMessage('Proposition envoyée. Elle sera relue avant publication.')}
-        />
+        <Suspense fallback={null}>
+          <SubmitArticleModal
+            mode="create"
+            onClose={() => setModalOpen(false)}
+            onSuccess={() => setSubmitMessage('Proposition envoyée. Elle sera relue avant publication.')}
+          />
+        </Suspense>
       )}
     </div>
   )

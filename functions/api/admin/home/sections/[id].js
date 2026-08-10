@@ -1,6 +1,6 @@
 import { json, badRequest, notFound, serverError } from '../../../../_lib/json.js'
 import { adminOnly } from '../../../../_lib/admin-gate.js'
-import { sanitizeRichText, sanitizePlainText } from '../../../../_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
@@ -33,7 +33,7 @@ export async function onRequestPatch({ request, env, params }) {
     const title = body.title !== undefined ? sanitizePlainText(body.title).trim() : existing.title
     const bodyHtml = body.body_html !== undefined ? sanitizeRichText(String(body.body_html).trim()) : existing.body_html
     const imageUrl = body.image_url !== undefined
-      ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null)
+      ? (body.image_url ? sanitizeCoverImage(body.image_url) : null)
       : existing.image_url
     const status = body.status === 'visible' || body.status === 'hidden' ? body.status : existing.status
 

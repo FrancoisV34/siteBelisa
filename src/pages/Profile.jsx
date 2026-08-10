@@ -1,9 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { motion } from 'framer-motion'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import Avatar from '../components/Avatar.jsx'
-import SubmitArticleModal from '../components/SubmitArticleModal.jsx'
+
+// TipTap weighs ~500 KB and only ever loads inside this modal. Importing it
+// eagerly here put the whole rich-text editor in the main bundle, so every
+// anonymous visitor downloaded it just to read the blog.
+const SubmitArticleModal = lazy(() => import('../components/SubmitArticleModal.jsx'))
 
 const STATUS_LABELS = {
   pending: 'En attente',
@@ -257,12 +261,14 @@ export default function Profile() {
       </motion.div>
 
       {editingId != null && (
-        <SubmitArticleModal
-          mode="edit"
-          postId={editingId}
-          onClose={() => setEditingId(null)}
-          onSuccess={() => reloadSubmissions()}
-        />
+        <Suspense fallback={null}>
+          <SubmitArticleModal
+            mode="edit"
+            postId={editingId}
+            onClose={() => setEditingId(null)}
+            onSuccess={() => reloadSubmissions()}
+          />
+        </Suspense>
       )}
     </div>
   )

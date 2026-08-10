@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../functions/_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage, sanitizeExternalUrl } from '../../functions/_lib/sanitize.js'
 
 describe('sanitizeRichText', () => {
   it('keeps allowed TipTap tags untouched', () => {
@@ -171,5 +171,37 @@ describe('sanitizeCoverImage', () => {
     const long = 'https://example.com/' + 'a'.repeat(600)
     const out = sanitizeCoverImage(long)
     expect(out?.length).toBe(500)
+  })
+})
+
+describe('sanitizeExternalUrl', () => {
+  it('accepts the retail links the admin actually pastes', () => {
+    const amazon = 'https://www.amazon.fr/Seul-renaissance-Belisa-Wagner/dp/2322117870'
+    expect(sanitizeExternalUrl(amazon)).toBe(amazon)
+    expect(sanitizeExternalUrl('http://example.com/livre')).toBe('http://example.com/livre')
+  })
+
+  it('rejects script-bearing schemes that would land in an href', () => {
+    for (const bad of [
+      'javascript:alert(1)',
+      'JavaScript:alert(1)',
+      '  javascript:alert(1)  ',
+      'data:text/html,<script>alert(1)</script>',
+      'vbscript:msgbox(1)',
+      'file:///etc/passwd',
+    ]) {
+      expect(sanitizeExternalUrl(bad), bad).toBeNull()
+    }
+  })
+
+  it('rejects relative paths, which make no sense for an external store', () => {
+    expect(sanitizeExternalUrl('/oeuvres')).toBeNull()
+    expect(sanitizeExternalUrl('www.amazon.fr/x')).toBeNull()
+  })
+
+  it('handles empty and non-string input', () => {
+    expect(sanitizeExternalUrl('')).toBeNull()
+    expect(sanitizeExternalUrl(null)).toBeNull()
+    expect(sanitizeExternalUrl(undefined)).toBeNull()
   })
 })
