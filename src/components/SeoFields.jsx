@@ -45,6 +45,10 @@ function Counter({ value, min, max }) {
 export default function SeoFields({ value, onChange, fallbacks, canonicalPath }) {
   const [open, setOpen] = useState(false)
 
+  // Read the host from the browser rather than repeating SITE_URL here: one
+  // constant to change on a domain switch, and the preview is always right.
+  const host = typeof window !== 'undefined' ? window.location.host : ''
+
   const set = (k) => (v) => onChange({ ...value, [k]: v })
   const onInput = (k) => (e) => set(k)(e.target.value)
 
@@ -121,7 +125,7 @@ export default function SeoFields({ value, onChange, fallbacks, canonicalPath })
               <span className="seo-preview-label">Aperçu Google</span>
               <div className="seo-preview-google">
                 <span className="seo-preview-url">
-                  belisa-wagner.fr{canonicalPath}
+                  {host}{canonicalPath}
                 </span>
                 <span className="seo-preview-title">{effectiveTitle}</span>
                 <span className="seo-preview-desc">
@@ -141,7 +145,7 @@ export default function SeoFields({ value, onChange, fallbacks, canonicalPath })
                   <div className="seo-preview-noimage">Aucune image</div>
                 )}
                 <div className="seo-preview-social-text">
-                  <span className="seo-preview-domain">BELISA-WAGNER.FR</span>
+                  <span className="seo-preview-domain">{host.toUpperCase()}</span>
                   <span className="seo-preview-title">{effectiveTitle}</span>
                   <span className="seo-preview-desc">{effectiveDesc}</span>
                 </div>
