@@ -9,33 +9,21 @@ const fadeUp = {
 export default function NotFound() {
   return (
     <motion.div
+      className="notfound"
       variants={fadeUp}
       initial="initial"
       animate="animate"
-      style={{
-        minHeight: '60vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        textAlign: 'center',
-        padding: '4rem 2rem',
-        background: '#fafaf8',
-        color: '#1d1d1f',
-      }}
     >
-      <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '6rem', fontWeight: 400, margin: 0, lineHeight: 1 }}>
-        404
-      </h1>
-      <h2 style={{ fontFamily: 'system-ui, sans-serif', fontSize: '1.5rem', fontWeight: 400, margin: '1rem 0 0.75rem' }}>
-        Page introuvable
-      </h2>
-      <p style={{ fontFamily: 'system-ui, sans-serif', color: '#6e6e73', maxWidth: '380px', marginBottom: '2.5rem' }}>
-        Cette page n'existe pas ou a été déplacée. Revenez à l'accueil pour continuer votre visite.
+      <p className="notfound-eyebrow">Erreur 404</p>
+      <h1>Il manque une page à ce livre</h1>
+      <p className="notfound-text">
+        Celle que vous cherchez n'a jamais été écrite, ou bien elle a changé de
+        titre en cours de route. Le reste de l'histoire, lui, est toujours là.
       </p>
-      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Link to="/" className="btn btn-primary">Retour à l'accueil</Link>
-        <Link to="/oeuvres" className="btn btn-secondary">Voir les œuvres</Link>
+      <div className="notfound-actions">
+        <Link to="/" className="btn btn-primary">Revenir à l'accueil</Link>
+        <Link to="/oeuvres" className="btn btn-secondary">Parcourir les ouvrages</Link>
+        <Link to="/blog" className="btn btn-secondary">Lire le blog</Link>
       </div>
     </motion.div>
   )

@@ -15,8 +15,13 @@ test('login page renders form', async ({ page }) => {
 })
 
 test('unknown route shows 404', async ({ page }) => {
-  await page.goto('/this-route-does-not-exist')
-  await expect(page.getByRole('heading', { name: '404' })).toBeVisible()
+  const response = await page.goto('/this-route-does-not-exist')
+  // Assert the contract rather than the wording, so the copy can be rewritten
+  // without breaking the test: a real 404 status and a way back into the site.
+  if (response) expect(response.status()).toBe(404)
+  const notFound = page.locator('.notfound')
+  await expect(notFound.getByRole('heading', { level: 1 })).toBeVisible()
+  await expect(notFound.getByRole('link', { name: /accueil/i })).toBeVisible()
 })
 
 test('navigation between public pages works', async ({ page }) => {
