@@ -1,6 +1,7 @@
 import { json, badRequest, notFound, serverError } from '../../../_lib/json.js'
 import { adminOnly } from '../../../_lib/admin-gate.js'
-import { sanitizePlainText } from '../../../_lib/sanitize.js'
+import { sanitizePlainText, sanitizeCoverImage, sanitizeExternalUrl } from '../../../_lib/sanitize.js'
+import { slugify, uniqueSlugIn } from '../../../_lib/slug.js'
 
 export async function onRequestGet({ request, env, params }) {
   try {
@@ -31,19 +32,30 @@ export async function onRequestPatch({ request, env, params }) {
     const technique = body.technique !== undefined ? (body.technique ? sanitizePlainText(body.technique).trim().slice(0, 200) : null) : existing.technique
     const dimensions = body.dimensions !== undefined ? (body.dimensions ? sanitizePlainText(body.dimensions).trim().slice(0, 100) : null) : existing.dimensions
     const description = body.description !== undefined ? (body.description ? sanitizePlainText(body.description).trim().slice(0, 2000) : null) : existing.description
-    const imageUrl = body.image_url !== undefined ? (body.image_url ? String(body.image_url).trim().slice(0, 500) : null) : existing.image_url
-    const bookUrl = body.book_url !== undefined ? (body.book_url ? String(body.book_url).trim().slice(0, 500) : null) : existing.book_url
-    const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? String(body.ebook_url).trim().slice(0, 500) : null) : existing.ebook_url
+    const imageUrl = body.image_url !== undefined ? (body.image_url ? sanitizeCoverImage(body.image_url) : null) : existing.image_url
+    const bookUrl = body.book_url !== undefined ? (body.book_url ? sanitizeExternalUrl(body.book_url) : null) : existing.book_url
+    const ebookUrl = body.ebook_url !== undefined ? (body.ebook_url ? sanitizeExternalUrl(body.ebook_url) : null) : existing.ebook_url
+    const isbn = body.isbn !== undefined ? (body.isbn ? sanitizePlainText(body.isbn).trim().slice(0, 20) : null) : existing.isbn
+    const metaDescription = body.meta_description !== undefined ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null) : existing.meta_description
+    const ogImage = body.og_image !== undefined ? (body.og_image ? sanitizeCoverImage(body.og_image) : null) : existing.og_image
+    const imageAlt = body.image_alt !== undefined ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null) : existing.image_alt
     const status = body.status === 'visible' || body.status === 'hidden' ? body.status : existing.status
 
     if (!title) return badRequest('Title required')
 
+    // Changing a slug breaks every existing link to the page, so it only moves
+    // when the admin edits the field itself — never as a side effect of a title
+    // change. An empty submitted slug falls back to the title.
+    const slug = body.slug !== undefined && slugify(body.slug || title) !== existing.slug
+      ? await uniqueSlugIn(env, 'oeuvres', slugify(body.slug || title), id)
+      : existing.slug
+
     const now = Math.floor(Date.now() / 1000)
     await env.DB.prepare(
-      `UPDATE oeuvres SET title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, status=?, updated_at=? WHERE id=?`
-    ).bind(title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, status, now, id).run()
+      `UPDATE oeuvres SET slug=?, title=?, year=?, technique=?, dimensions=?, description=?, image_url=?, book_url=?, ebook_url=?, isbn=?, meta_description=?, og_image=?, image_alt=?, status=?, updated_at=? WHERE id=?`
+    ).bind(slug, title, year, technique, dimensions, description, imageUrl, bookUrl, ebookUrl, isbn, metaDescription, ogImage, imageAlt, status, now, id).run()
 
-    return json({ oeuvre: { id, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, status, position: existing.position } })
+    return json({ oeuvre: { id, slug, title, year, technique, dimensions, description, image_url: imageUrl, book_url: bookUrl, ebook_url: ebookUrl, isbn, meta_description: metaDescription, og_image: ogImage, image_alt: imageAlt, status, position: existing.position } })
   } catch (e) {
     return serverError(e.message)
   }

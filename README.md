@@ -12,6 +12,7 @@ Site personnel de l'artiste Belisa Wagner — vitrine + blog + livre d'or, avec 
 
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md) — schéma technique, endpoints, modèle de données
 - [`DEPLOY.md`](./DEPLOY.md) — déploiement initial sur Cloudflare Pages
+- [`SEO.md`](./SEO.md) — injection des métadonnées à l'edge, données structurées, performance
 - [`CLAUDE.md`](./CLAUDE.md) — conventions et commandes utiles (pour assistants IA et nouveaux contributeurs)
 
 ## Prérequis

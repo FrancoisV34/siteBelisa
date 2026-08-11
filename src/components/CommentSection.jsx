@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { useAuth } from '../contexts/AuthContext.jsx'
-
-function formatDate(ts) {
-  return new Date(ts * 1000).toLocaleDateString('fr-FR', {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
-  })
-}
+import { formatDate, isoDate } from '../lib/date.js'
 
 export default function CommentSection({ postId }) {
   const { user } = useAuth()
@@ -53,7 +48,7 @@ export default function CommentSection({ postId }) {
           <li key={c.id} className="comment">
             <div className="comment-head">
               <span className="comment-author">{c.display_name}</span>
-              <span className="comment-date">{formatDate(c.created_at)}</span>
+              <time className="comment-date" dateTime={isoDate(c.created_at)}>{formatDate(c.created_at)}</time>
             </div>
             <p className="comment-body">{c.content}</p>
           </li>

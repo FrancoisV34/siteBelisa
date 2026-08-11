@@ -1,6 +1,6 @@
 import { json, badRequest, serverError } from '../../../../_lib/json.js'
 import { adminOnly } from '../../../../_lib/admin-gate.js'
-import { sanitizeRichText, sanitizePlainText } from '../../../../_lib/sanitize.js'
+import { sanitizeRichText, sanitizePlainText, sanitizeCoverImage } from '../../../../_lib/sanitize.js'
 
 export async function onRequestGet({ request, env }) {
   try {
@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env }) {
 
     const title = sanitizePlainText(body.title).trim()
     const bodyHtml = sanitizeRichText(String(body.body_html || '').trim())
-    const imageUrl = body.image_url ? String(body.image_url).trim().slice(0, 500) : null
+    const imageUrl = body.image_url ? sanitizeCoverImage(body.image_url) : null
     if (!title) return badRequest('Title required')
 
     const max = await env.DB.prepare(

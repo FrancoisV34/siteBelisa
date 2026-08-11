@@ -3,13 +3,7 @@ import { useParams, Link } from 'react-router'
 import { motion } from 'framer-motion'
 import LikeButton from '../components/LikeButton.jsx'
 import CommentSection from '../components/CommentSection.jsx'
-
-function formatDate(ts) {
-  if (!ts) return ''
-  return new Date(ts * 1000).toLocaleDateString('fr-FR', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  })
-}
+import { formatDate, isoDate } from '../lib/date.js'
 
 export default function Post() {
   const { slug } = useParams()
@@ -58,13 +52,14 @@ export default function Post() {
       >
         {post.cover_image && (
           <div className="post-cover">
-            <img src={post.cover_image} alt="" />
+            <img src={post.cover_image} alt={post.image_alt || post.title} fetchPriority="high" />
           </div>
         )}
         <header className="post-header">
           <h1>{post.title}</h1>
           <p className="post-meta">
-            {post.author_name} &middot; {formatDate(post.published_at)}
+            {post.author_name} &middot;{' '}
+            <time dateTime={isoDate(post.published_at)}>{formatDate(post.published_at)}</time>
           </p>
         </header>
         <div

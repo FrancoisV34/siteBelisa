@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import ImageUpload from '../../components/ImageUpload.jsx'
+import SeoFields from '../../components/SeoFields.jsx'
 
 export default function OeuvreEditor() {
   const { id } = useParams()
@@ -11,8 +12,9 @@ export default function OeuvreEditor() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
   const [form, setForm] = useState({
-    title: '', year: '', technique: '', dimensions: '', description: '',
-    image_url: '', book_url: '', ebook_url: '', status: 'visible',
+    title: '', slug: '', year: '', technique: '', dimensions: '', description: '',
+    image_url: '', book_url: '', ebook_url: '', isbn: '', status: 'visible',
+    meta_description: '', og_image: '', image_alt: '',
   })
 
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function OeuvreEditor() {
       .then((r) => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
       .then((d) => setForm({
         title: d.oeuvre.title || '',
+        slug: d.oeuvre.slug || '',
         year: d.oeuvre.year || '',
         technique: d.oeuvre.technique || '',
         dimensions: d.oeuvre.dimensions || '',
@@ -28,6 +31,10 @@ export default function OeuvreEditor() {
         image_url: d.oeuvre.image_url || '',
         book_url: d.oeuvre.book_url || '',
         ebook_url: d.oeuvre.ebook_url || '',
+        isbn: d.oeuvre.isbn || '',
+        meta_description: d.oeuvre.meta_description || '',
+        og_image: d.oeuvre.og_image || '',
+        image_alt: d.oeuvre.image_alt || '',
         status: d.oeuvre.status || 'visible',
       }))
       .catch((e) => setError(e.message))
@@ -111,6 +118,40 @@ export default function OeuvreEditor() {
           <span>Lien ebook (URL externe)</span>
           <input type="url" value={form.ebook_url} onChange={onInput('ebook_url')} placeholder="https://…" maxLength={500} />
         </label>
+        <label>
+          <span>ISBN</span>
+          <input type="text" value={form.isbn} onChange={onInput('isbn')} placeholder="978-2-1234-5680-3" maxLength={20} />
+          <small className="admin-hint">
+            Permet à Google de relier cette page à l'édition réelle du livre.
+          </small>
+        </label>
+        <label>
+          <span>Adresse de la page</span>
+          <input
+            type="text"
+            value={form.slug}
+            onChange={onInput('slug')}
+            placeholder={isNew ? 'généré depuis le titre' : ''}
+            maxLength={80}
+          />
+          <small className="admin-hint">
+            {form.slug
+              ? `Adresse : /oeuvres/${form.slug}.`
+              : 'Laissez vide pour générer automatiquement depuis le titre.'}
+            {!isNew && form.slug && ' La modifier casse les liens existants vers cette page.'}
+          </small>
+        </label>
+        <SeoFields
+          value={form}
+          onChange={setForm}
+          canonicalPath={`/oeuvres/${form.slug || '…'}`}
+          fallbacks={{
+            title: form.title,
+            description: form.description,
+            image: form.image_url,
+            imageAlt: form.title ? `Couverture de « ${form.title} »` : '',
+          }}
+        />
         <label>
           <span>Statut</span>
           <select value={form.status} onChange={onInput('status')}>

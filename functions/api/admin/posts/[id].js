@@ -7,7 +7,9 @@ async function loadAndCheck(env, params, user) {
   const id = parseInt(params.id, 10)
   if (!id) return { error: badRequest('Invalid id') }
   const post = await env.DB.prepare(
-    `SELECT id, author_id, slug, title, content_html, excerpt, cover_image, status, published_at FROM posts WHERE id = ?`
+    `SELECT id, author_id, slug, title, content_html, excerpt, cover_image,
+            meta_description, og_image, image_alt, status, published_at
+     FROM posts WHERE id = ?`
   ).bind(id).first()
   if (!post) return { error: notFound('Post not found') }
   if (user.role !== 'admin' && post.author_id !== user.id) {
@@ -50,6 +52,15 @@ export async function onRequestPatch({ request, env, params }) {
     const excerpt = body.excerpt !== undefined
       ? (body.excerpt ? sanitizePlainText(body.excerpt).trim().slice(0, 300) : null)
       : post.excerpt
+    const metaDescription = body.meta_description !== undefined
+      ? (body.meta_description ? sanitizePlainText(body.meta_description).trim().slice(0, 300) : null)
+      : post.meta_description
+    const ogImage = body.og_image !== undefined
+      ? (body.og_image ? sanitizeCoverImage(body.og_image) : null)
+      : post.og_image
+    const imageAlt = body.image_alt !== undefined
+      ? (body.image_alt ? sanitizePlainText(body.image_alt).trim().slice(0, 200) : null)
+      : post.image_alt
     let coverImage = post.cover_image
     if (body.cover_image !== undefined) {
       if (body.cover_image) {
@@ -75,9 +86,11 @@ export async function onRequestPatch({ request, env, params }) {
     if (newStatus === 'draft') publishedAt = null
 
     await env.DB.prepare(
-      `UPDATE posts SET title=?, slug=?, content_html=?, excerpt=?, cover_image=?, status=?, published_at=?, updated_at=?
+      `UPDATE posts SET title=?, slug=?, content_html=?, excerpt=?, cover_image=?,
+           meta_description=?, og_image=?, image_alt=?, status=?, published_at=?, updated_at=?
        WHERE id = ?`
-    ).bind(title, slug, contentHtml, excerpt, coverImage, newStatus, publishedAt, now, post.id).run()
+    ).bind(title, slug, contentHtml, excerpt, coverImage,
+      metaDescription, ogImage, imageAlt, newStatus, publishedAt, now, post.id).run()
 
     return json({ post: { id: post.id, slug, title, status: newStatus } })
   } catch (e) {

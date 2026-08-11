@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router'
 import { motion } from 'framer-motion'
 import { BookOpen, Tablet } from 'lucide-react'
 
@@ -60,7 +61,7 @@ function Oeuvres() {
           whileInView="visible"
           viewport={{ once: true, amount: 'some' }}
         >
-          {oeuvres.map((oeuvre) => (
+          {oeuvres.map((oeuvre, i) => (
             <motion.article
               key={oeuvre.id}
               className="oeuvre-card"
@@ -68,15 +69,22 @@ function Oeuvres() {
               whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)' }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             >
-              <div className="oeuvre-image">
+              <Link to={`/oeuvres/${oeuvre.slug}`} className="oeuvre-image">
                 {oeuvre.image_url ? (
-                  <img src={oeuvre.image_url} alt={oeuvre.title} />
+                  <img
+                    src={oeuvre.image_url}
+                    alt={`Couverture de « ${oeuvre.title} »`}
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    fetchPriority={i === 0 ? 'high' : 'auto'}
+                  />
                 ) : (
                   <div className="placeholder-image">{oeuvre.title}</div>
                 )}
-              </div>
+              </Link>
               <div className="oeuvre-info">
-                <h3>{oeuvre.title}</h3>
+                <h3>
+                  <Link to={`/oeuvres/${oeuvre.slug}`}>{oeuvre.title}</Link>
+                </h3>
                 <p className="oeuvre-meta">
                   {[oeuvre.year, oeuvre.technique, oeuvre.dimensions].filter(Boolean).join(' — ')}
                 </p>
@@ -84,13 +92,13 @@ function Oeuvres() {
                 {(oeuvre.book_url || oeuvre.ebook_url) && (
                   <div className="oeuvre-actions">
                     {oeuvre.book_url && (
-                      <a href={oeuvre.book_url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                      <a href={oeuvre.book_url} target="_blank" rel="noopener noreferrer sponsored nofollow" className="btn btn-primary">
                         <BookOpen size={16} />
                         <span>Livre</span>
                       </a>
                     )}
                     {oeuvre.ebook_url && (
-                      <a href={oeuvre.ebook_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+                      <a href={oeuvre.ebook_url} target="_blank" rel="noopener noreferrer sponsored nofollow" className="btn btn-secondary">
                         <Tablet size={16} />
                         <span>Ebook</span>
                       </a>

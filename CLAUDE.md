@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Guide pour assistants IA et nouveaux contributeurs travaillant sur ce repo. Voir aussi `README.md`, `ARCHITECTURE.md`, `DEPLOY.md`.
+Guide pour assistants IA et nouveaux contributeurs travaillant sur ce repo. Voir aussi `README.md`, `ARCHITECTURE.md`, `DEPLOY.md`, `SEO.md`.
 
 ## Vue d'ensemble en une phrase
 
@@ -55,7 +55,9 @@ SPA React 19 (Vite) servie par Cloudflare Pages, avec un backend en Pages Functi
 - **Login échoue après une nouvelle migration** : la migration n'a pas été appliquée en remote. Lance `npx wrangler d1 migrations apply site-belisa --remote`.
 - **Cookie de session perdu en local** : `Secure` est forcé sur le cookie (`functions/_lib/auth.js`) → en local ça marche quand même via `localhost` mais pas via une IP LAN.
 - **TipTap stocke du HTML brut** : tout contenu provenant de `posts.content_html`, `home_sections.body_html` est rendu via `dangerouslySetInnerHTML`. **C'est un risque XSS si du HTML non maîtrisé arrive dans la DB.** Aujourd'hui seul l'admin peut écrire ces champs, mais une sanitization serveur est prévue (cf. plan d'audit sécurité).
-- **Upload R2** : limité à 5 Mo et aux types `image/jpeg|png|webp|gif` (cf. `functions/_lib/r2.js`). Les fichiers sont servis via `/r2/images/<uuid>.<ext>` avec cache long.
+- **Une nouvelle route publique renvoie 404** : le middleware SEO sert un vrai 404 pour toute route absente de `STATIC_ROUTES` dans `functions/_lib/seo.js` (c'est ce qui a supprimé les soft 404). Ajouter la route côté React ne suffit pas — voir `SEO.md` §« Ajouter une route publique ».
+- **Ne pas retirer le fondu d'`AnimatePresence` ni le `min-height` de `.main-content`** : les deux ont l'air décoratifs mais tiennent la CLS. Détails et mesures dans `SEO.md`.
+- **Upload R2** : limité à 5 Mo et aux types `image/jpeg|png|webp|gif` (cf. `functions/_lib/r2.js`). Les images sont redimensionnées et converties en WebP côté navigateur avant l'envoi (`src/lib/image.js`). Les fichiers sont servis via `/r2/images/<uuid>.<ext>` avec cache long.
 - **`scripts/local/` est gitignored** : ne pas s'attendre à le trouver dans le repo. Contient le seed admin avec credentials.
 - **Pas de `.env`** : toute la config passe par `wrangler.toml` (bindings) et le dashboard Cloudflare (secrets).
 
