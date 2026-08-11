@@ -16,9 +16,11 @@ test('login page renders form', async ({ page }) => {
 
 test('unknown route shows 404', async ({ page }) => {
   const response = await page.goto('/this-route-does-not-exist')
-  // Assert the contract rather than the wording, so the copy can be rewritten
-  // without breaking the test: a real 404 status and a way back into the site.
-  if (response) expect(response.status()).toBe(404)
+  // The 404 *status* comes from the SEO middleware, which only runs under the
+  // Functions runtime; the Vite dev server answers 200 for every path. That
+  // contract is asserted in seo.spec.js — here we only check the rendered page,
+  // by role rather than wording so the copy can be rewritten freely.
+  if (response && process.env.E2E_BASE_URL) expect(response.status()).toBe(404)
   const notFound = page.locator('.notfound')
   await expect(notFound.getByRole('heading', { level: 1 })).toBeVisible()
   await expect(notFound.getByRole('link', { name: /accueil/i })).toBeVisible()
