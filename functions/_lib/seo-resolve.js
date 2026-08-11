@@ -137,7 +137,11 @@ async function resolveBlogIndex(env, page = 1) {
     links,
     description: truncate(
       page === 1
-        ? `Les articles et actualités de ${SITE_NAME}, romancière. ${total} article${total > 1 ? 's' : ''} à lire.`
+        ? // Announcing "0 article" invites Google to file the page as thin
+          // content, so an empty blog describes what it is for instead.
+          total > 0
+          ? `Les articles et actualités de ${SITE_NAME}, romancière. ${total} article${total > 1 ? 's' : ''} à lire.`
+          : `Le blog de ${SITE_NAME}, romancière : coulisses d'écriture, actualité de la trilogie SEUL et rencontres avec ses lecteurs.`
         : `Articles de ${SITE_NAME}, page ${page} sur ${totalPages}.`
     ),
     ogImage: DEFAULT_OG_IMAGE,
@@ -319,10 +323,14 @@ async function resolveOeuvre(env, slug) {
   if (!oeuvre) return null
 
   const facts = [oeuvre.year, oeuvre.technique, oeuvre.dimensions].filter(Boolean).join(' — ')
+  // Descriptions are stored as raw back-cover excerpts, which often open
+  // mid-sentence and name neither the book nor its author — a poor search
+  // snippet. Lead with both so the result stands on its own, and let the
+  // authored meta_description override the whole thing when it is filled in.
+  const lead = `${oeuvre.title}, de ${SITE_NAME}${facts ? ` (${facts})` : ''}.`
   const description = truncate(
     oeuvre.meta_description ||
-      oeuvre.description ||
-      `${oeuvre.title}, ouvrage de ${SITE_NAME}${facts ? ` (${facts})` : ''}.`
+      (oeuvre.description ? `${lead} ${oeuvre.description}` : lead)
   )
   const image = oeuvre.og_image || oeuvre.image_url || DEFAULT_OG_IMAGE
   const coverAlt = oeuvre.image_alt || `Couverture de « ${oeuvre.title} »`

@@ -2,8 +2,13 @@
 <html lang="fr">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Google only shows a favicon in search results when it can find a square
+         icon whose size is a multiple of 48px, and it reads these link tags
+         rather than the web manifest. Without this line the 192px icon exists
+         but stays invisible to the favicon crawler. -->
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

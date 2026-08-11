@@ -93,7 +93,10 @@ export function truncate(text, max = 160) {
   if (clean.length <= max) return clean
   const cut = clean.slice(0, max - 1)
   const lastSpace = cut.lastIndexOf(' ')
-  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + '…'
+  const kept = lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut
+  // Excerpts frequently end on their own suspension points; appending the
+  // ellipsis to those would render as "... …".
+  return kept.replace(/[\s.,;:—–-]+$/, '') + '…'
 }
 
 export function pageTitle(part) {
