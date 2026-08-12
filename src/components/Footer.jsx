@@ -40,8 +40,11 @@ function Footer() {
           custom={1}
         >
           <h3>Contact</h3>
+          {/* The address itself lives on the legal pages, where publishing it
+              is a legal obligation. Repeating it in the footer put it on every
+              page, and Google surfaced it in the search snippet. */}
           <p>
-            <a href="mailto:vittecoqisabelle@gmail.com">vittecoqisabelle@gmail.com</a>
+            <Link to="/mentions-legales">Coordonn&eacute;es de contact</Link>
           </p>
         </motion.div>
         <motion.div
